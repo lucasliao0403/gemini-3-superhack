@@ -23,6 +23,11 @@ const resolveUrl = (path?: string | null) => {
   return `${API_BASE_URL}${prefix}${path}`;
 };
 
+const resolveUrlList = (paths?: string[] | null) => {
+  if (!paths || paths.length === 0) return [];
+  return paths.map((path) => resolveUrl(path) || path);
+};
+
 export const withResolvedUrls = (job: JobStatus): JobStatus => {
   const outputs = job.outputs?.map((output) => ({
     ...output,
@@ -36,8 +41,10 @@ export const withResolvedUrls = (job: JobStatus): JobStatus => {
       assets: {
         ...clip.assets,
         frame_url: resolveUrl(clip.assets.frame_url) || clip.assets.frame_url,
+        frame_urls: resolveUrlList(clip.assets.frame_urls),
         ref_frame_url:
           resolveUrl(clip.assets.ref_frame_url) || clip.assets.ref_frame_url,
+        generated_frame_urls: resolveUrlList(clip.assets.generated_frame_urls),
         clip_url: resolveUrl(clip.assets.clip_url) || clip.assets.clip_url,
         audio_url: resolveUrl(clip.assets.audio_url) || clip.assets.audio_url,
       },

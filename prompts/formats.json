@@ -3,10 +3,20 @@
     "id": 1,
     "name": "Anime highlight from a different angle",
     "input_mode": "video_plus_prompt",
-    "model": "xai/grok-imagine-video/edit-video",
+    "model": "xai/grok-imagine-video/image-to-video",
     "length_s": 6,
     "prompt_reference": "Generate a highly accurate anime rendition of this scene from an angle where the face of the star player can be seen. Turn this into a dramatic anime scene where {description} is happening, highly stylized and pay attention to details.",
     "prompt_template": "Anime highlight edit of this moment: {{description}}. Emphasize drama and intensity.",
     "ref_frame_prompt": "Anime-style football highlight still frame. Show the action clearly: {description}. Vertical 9:16."
+  },
+  {
+    "id": 3,
+    "name": "ESPN-style studio segment parody (ridicule/hot-take)",
+    "input_mode": "video_plus_prompt",
+    "model": "xai/grok-imagine-video/image-to-video",
+    "length_s": 6,
+    "prompt_reference": "Create a short-form sports studio segment that FEELS like an ESPN/SportsCenter-style highlight breakdown, but as a parody.\n\nTone: smug, overproduced, overly-serious analysis of something obvious; lightly ridicules the network-style hot-take theatrics OR lightly ridicules the original play (but keep it playful, not hateful).\n\nVisual language: polished studio lighting, dramatic camera moves, quick cutaways, replay-style angles, slow-motion emphasis, tasteful lens flares.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the \"ESPN segment\" vibe through set design, lighting, and camera direction only.\n\nMaintain player identity and uniforms, keep the action readable, and keep the scene coherent from beat 1 to beat 6.",
+    "prompt_template": "ESPN-style studio breakdown parody of: {{description}}. Overproduced analysis vibe. No on-screen text.",
+    "ref_frame_prompt": "Polished sports studio segment parody frame. Cinematic studio lighting. Show the key moment clearly: {description}. Optional analyst silhouette/desk in foreground. Vertical 9:16. No text."
   }
 ]

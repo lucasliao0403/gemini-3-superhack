@@ -21,15 +21,13 @@ RETRYABLE_OVERLOAD_STATUS = 503
 
 CLIP_JSON_SCHEMA: Dict[str, Any] = {
     "type": "array",
-    "minItems": 2,
-    "maxItems": 5,
+    "minItems": 1,
+    "maxItems": 1,
     "items": {
         "type": "object",
         "additionalProperties": False,
         "required": [
-            "start",
-            "peak",
-            "end",
+            "beats",
             "type",
             "description",
             "players",
@@ -41,6 +39,26 @@ CLIP_JSON_SCHEMA: Dict[str, Any] = {
             "start": {"type": "string", "description": "Start timestamp MM:SS"},
             "peak": {"type": "string", "description": "Peak timestamp MM:SS"},
             "end": {"type": "string", "description": "End timestamp MM:SS"},
+            "beats": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["timestamp", "caption"],
+                    "properties": {
+                        "timestamp": {
+                            "type": "string",
+                            "description": "Beat timestamp MM:SS",
+                        },
+                        "caption": {
+                            "type": "string",
+                            "description": "Detailed beat caption",
+                        },
+                    },
+                },
+            },
             "type": {
                 "type": "string",
                 "enum": [
@@ -57,6 +75,10 @@ CLIP_JSON_SCHEMA: Dict[str, Any] = {
             "context": {"type": "string"},
             "announcer_energy": {"type": "integer", "minimum": 1, "maximum": 10},
             "crowd_energy": {"type": "integer", "minimum": 1, "maximum": 10},
+            "physical_attributes": {
+                "type": "object",
+                "additionalProperties": {"type": "string"},
+            },
             "generated_storyboard_frames": {
                 "type": "array",
                 "minItems": 6,
@@ -79,15 +101,23 @@ def _load_clip_detection_prompt() -> str:
 def _mock_analysis() -> List[Dict[str, Any]]:
     return [
         {
-            "start": "02:34",
-            "peak": "02:41",
-            "end": "02:47",
+            "beats": [
+                {"timestamp": "02:34", "caption": "Quarterback scans right as the pocket collapses."},
+                {"timestamp": "02:36", "caption": "He steps up and begins his throwing motion with a defender at his hip."},
+                {"timestamp": "02:38", "caption": "The ball leaves his hand on a high arc toward the right sideline."},
+                {"timestamp": "02:41", "caption": "Receiver hauls it in over a trailing defender at the numbers."},
+                {"timestamp": "02:44", "caption": "He breaks a tackle and accelerates into open field."},
+                {"timestamp": "02:47", "caption": "He dives across the goal line as the crowd erupts."},
+            ],
             "type": "big_play",
             "description": "Explosive touchdown after a broken tackle",
             "players": ["Player A"],
             "context": "Gives the team a late lead in the 4th quarter",
             "announcer_energy": 9,
             "crowd_energy": 9,
+            "physical_attributes": {
+                "Player A": "muscular build, medium-dark skin tone, braided hair",
+            },
             "generated_storyboard_frames": [
                 "Wide anime stadium view as Player A breaks free toward the end zone",
                 "Tracking close-up as Player A dodges a defender with motion streaks",
@@ -96,26 +126,7 @@ def _mock_analysis() -> List[Dict[str, Any]]:
                 "Goal-line view as Player A dives across the line",
                 "Celebration freeze with teammates rushing in, anime glow effects",
             ],
-        },
-        {
-            "start": "08:12",
-            "peak": "08:18",
-            "end": "08:25",
-            "type": "fail",
-            "description": "Quarterback throws a costly interception",
-            "players": ["Player B"],
-            "context": "Momentum swing after a promising drive",
-            "announcer_energy": 7,
-            "crowd_energy": 6,
-            "generated_storyboard_frames": [
-                "Wide anime stadium view as the QB winds up",
-                "Close-up as the ball leaves the QB's hand with streaking lines",
-                "Mid-shot as the defender breaks on the route",
-                "Low-angle as the interception happens with dramatic lighting",
-                "Reaction shot of the QB as the crowd erupts",
-                "Celebration freeze of the defense with stylized sparks",
-            ],
-        },
+        }
     ]
 
 

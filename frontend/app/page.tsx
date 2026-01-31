@@ -65,11 +65,10 @@ export default function Home() {
     <div className="container">
       <div className="stack">
         <header className="stack">
-          <span className="badge">Who's Clip Is It?</span>
-          <h1 className="title">AI-powered brainrot reels for sports clips.</h1>
+          <h1 className="megaTitle">whose clip is it?</h1>
+          <h2 className="title">ai-powered brainrot reels for sports clips.</h2>
           <p className="subtitle">
-            Upload an MP4 under 100MB. We'll find 2-5 viral moments and generate
-            reels.
+            upload a video. we'll find the viral moment and generate a reel.
           </p>
           {demoMode && (
             <p className="subtitle">
@@ -103,7 +102,7 @@ export default function Home() {
 
           <div className="row">
             <button className="button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Uploading..." : "Generate reels"}
+              {isSubmitting ? "uploading..." : "generate reel"}
             </button>
             <a className="button secondary" href="/jobs/demo">
               View demo results

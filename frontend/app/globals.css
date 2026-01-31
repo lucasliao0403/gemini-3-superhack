@@ -54,6 +54,20 @@ a {
   flex-wrap: wrap;
 }
 
+.scroll-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 6px;
+}
+
+.scroll-row .video {
+  flex: 0 0 auto;
+  width: 220px;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -69,6 +83,13 @@ a {
   font-size: 28px;
   font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+.megaTitle {
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
 }
 
 h2 {

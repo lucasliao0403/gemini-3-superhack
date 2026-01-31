@@ -60,12 +60,26 @@ def _peak_weighted_timestamps(
     return stabilized[:count]
 
 
-def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> Dict[str, Any]:
+def extract_assets(input_path: Path, clip: Dict[str, Any], output_dir: Path) -> Dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    start_s = clip["start_ms"] / 1000.0
-    peak_s = clip["peak_ms"] / 1000.0
-    end_s = clip["end_ms"] / 1000.0
+    beat_timestamps_ms = clip.get("beat_timestamps_ms")
+    timestamps: list[float]
+    if isinstance(beat_timestamps_ms, list) and len(beat_timestamps_ms) >= 6:
+        timestamps = [value / 1000.0 for value in beat_timestamps_ms[:6]]
+        start_s = timestamps[0]
+        end_s = timestamps[-1]
+        peak_s = timestamps[3] if len(timestamps) >= 4 else timestamps[0]
+    else:
+        start_s = clip["start_ms"] / 1000.0
+        peak_s = clip["peak_ms"] / 1000.0
+        end_s = clip["end_ms"] / 1000.0
+        timestamps = _peak_weighted_timestamps(
+            start_s=start_s,
+            peak_s=peak_s,
+            end_s=end_s,
+            count=6,
+        )
     clip_id = clip.get("clip_id", "unknown")
 
     print(
@@ -80,12 +94,6 @@ def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> 
     clip_path = output_dir / "clip.mp4"
     audio_path = output_dir / "audio.wav"
 
-    timestamps = _peak_weighted_timestamps(
-        start_s=start_s,
-        peak_s=peak_s,
-        end_s=end_s,
-        count=len(frame_paths),
-    )
     for frame_path, timestamp in zip(frame_paths, timestamps):
         _run_ffmpeg(
             [

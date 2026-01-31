@@ -130,41 +130,99 @@ export default function JobPage() {
                   )}
                   <span>{clip.description}</span>
                 </div>
-                {(clip.assets?.frame_url ||
-                  clip.assets?.ref_frame_url ||
-                  clip.assets?.clip_url) && (
-                  <div className="row">
-                    {clip.assets?.ref_frame_url && (
-                      <img
-                        className="video"
-                        src={clip.assets.ref_frame_url}
-                        alt={`Reference frame for ${clip.clip_id || "clip"}`}
-                      />
-                    )}
-                    {clip.assets?.frame_url && (
-                      <img
-                        className="video"
-                        src={clip.assets.frame_url}
-                        alt={`Frame for ${clip.clip_id || "clip"}`}
-                      />
-                    )}
+                {(clip.assets?.frame_urls?.length ||
+                  clip.assets?.generated_frame_urls?.length ||
+                  clip.assets?.clip_url ||
+                  clip.assets?.frame_url ||
+                  clip.assets?.ref_frame_url) && (
+                  <div className="stack">
+                    {clip.assets?.frame_urls?.length ? (
+                      <details className="stack">
+                        <summary className="subtitle">Freeze frames (6)</summary>
+                        <div className="scroll-row">
+                          {clip.assets.frame_urls.map((url, idx) => (
+                            <img
+                              key={`${url}-${idx}`}
+                              className="video"
+                              src={url}
+                              alt={`Freeze frame ${idx + 1} for ${clip.clip_id || "clip"}`}
+                            />
+                          ))}
+                        </div>
+                      </details>
+                    ) : clip.assets?.frame_url ? (
+                      <details className="stack">
+                        <summary className="subtitle">Freeze frame</summary>
+                        <div className="scroll-row">
+                          <img
+                            className="video"
+                            src={clip.assets.frame_url}
+                            alt={`Frame for ${clip.clip_id || "clip"}`}
+                          />
+                        </div>
+                      </details>
+                    ) : null}
+
+                    {clip.assets?.generated_frame_urls?.length ? (
+                      <details className="stack">
+                        <summary className="subtitle">Generated keyframes (6)</summary>
+                        <div className="scroll-row">
+                          {clip.assets.generated_frame_urls.map((url, idx) => (
+                            <img
+                              key={`${url}-${idx}`}
+                              className="video"
+                              src={url}
+                              alt={`Generated frame ${idx + 1} for ${clip.clip_id || "clip"}`}
+                            />
+                          ))}
+                        </div>
+                      </details>
+                    ) : clip.assets?.ref_frame_url ? (
+                      <details className="stack">
+                        <summary className="subtitle">Generated keyframe</summary>
+                        <div className="scroll-row">
+                          <img
+                            className="video"
+                            src={clip.assets.ref_frame_url}
+                            alt={`Reference frame for ${clip.clip_id || "clip"}`}
+                          />
+                        </div>
+                      </details>
+                    ) : null}
+
                     {clip.assets?.clip_url && (
-                      <video
-                        className="video"
-                        controls
-                        src={clip.assets.clip_url}
-                      />
+                      <div className="stack">
+                        <span className="subtitle">Source clip</span>
+                        <div className="row">
+                          <video
+                            className="video"
+                            controls
+                            src={clip.assets.clip_url}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
-                {(clip.prompts?.image_prompt || clip.prompts?.video_prompt) && (
+                {(clip.prompts?.frame_prompts?.length ||
+                  clip.prompts?.image_prompt ||
+                  clip.prompts?.video_prompt) && (
                   <div className="stack">
-                    {clip.prompts?.image_prompt && (
+                    {clip.prompts?.frame_prompts?.length ? (
+                      <div className="stack">
+                        <span className="subtitle">Keyframe prompts</span>
+                        <pre className="code">
+                          {clip.prompts.frame_prompts
+                            .map((prompt, idx) => `#${idx + 1} ${prompt}`)
+                            .join("\n")}
+                        </pre>
+                      </div>
+                    ) : clip.prompts?.image_prompt ? (
                       <div className="stack">
                         <span className="subtitle">Image prompt</span>
                         <pre className="code">{clip.prompts.image_prompt}</pre>
                       </div>
-                    )}
+                    ) : null}
                     {clip.prompts?.video_prompt && (
                       <div className="stack">
                         <span className="subtitle">Video prompt</span>

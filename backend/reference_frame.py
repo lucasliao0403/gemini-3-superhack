@@ -26,7 +26,8 @@ DEFAULT_PROMPT = (
 DEFAULT_I2I_PREFIX = (
     "You are editing a composite reference image that contains two panels.\n"
     "Use the LEFT panel for character/style continuity and the RIGHT panel for\n"
-    "scene composition. Output a single unified image (no split panels)."
+    "scene composition. Output a single unified image (no split panels).\n"
+    "Ensure this frame is the logical successor to the previous generated frame."
 )
 
 
@@ -60,35 +61,6 @@ def _run_ffmpeg(args: list[str]) -> None:
     if result.returncode != 0:
         logger.error("ffmpeg_ref_error stderr=%s", result.stderr.strip())
         raise RuntimeError(result.stderr.strip() or "ffmpeg failed")
-
-
-def _build_composite(
-    left_path: Path,
-    right_path: Path,
-    output_path: Path,
-) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    _run_ffmpeg(
-        [
-            config.FFMPEG_PATH,
-            "-y",
-            "-i",
-            str(left_path),
-            "-i",
-            str(right_path),
-            "-filter_complex",
-            (
-                "[0:v]scale=540:960:force_original_aspect_ratio=decrease,"
-                "pad=540:960:(ow-iw)/2:(oh-ih)/2[left];"
-                "[1:v]scale=540:960:force_original_aspect_ratio=decrease,"
-                "pad=540:960:(ow-iw)/2:(oh-ih)/2[right];"
-                "[left][right]hstack=inputs=2"
-            ),
-            "-frames:v",
-            "1",
-            str(output_path),
-        ]
-    )
 
 
 def _debug_log(
@@ -179,11 +151,6 @@ def generate_keyframes(
     i2i_prefix = str(clip_prompts.get("i2i_prompt_prefix") or DEFAULT_I2I_PREFIX).strip()
 
     assets = clip.get("assets") or {}
-    frame_paths: List[Path] = []
-    if isinstance(assets.get("frame_paths"), list):
-        frame_paths = [Path(path) for path in assets.get("frame_paths") if path]
-    if not frame_paths and assets.get("frame_path"):
-        frame_paths = [Path(assets["frame_path"])]
 
     output_dir = job_store.job_dir(job_id) / "assets" / clip_id
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -202,14 +169,9 @@ def generate_keyframes(
                     "output_format": "png",
                 }
             else:
-                if frame_paths:
-                    reference_frame = frame_paths[min(idx, len(frame_paths) - 1)]
-                else:
-                    reference_frame = generated_paths[-1]
-                composite_path = output_dir / f"composite_{idx + 1:02d}.png"
-                _build_composite(generated_paths[-1], reference_frame, composite_path)
+                reference_frame = generated_paths[-1]
                 upload_url = _with_retries(
-                    lambda: client.upload_file(composite_path),
+                    lambda: client.upload_file(reference_frame),
                     label="fal_keyframe_upload_file",
                 )
                 model = config.FAL_GROK_IMAGE_EDIT_MODEL
@@ -232,15 +194,47 @@ def generate_keyframes(
                 },
             )
             # endregion agent log
+            # region agent log
+            _debug_log(
+                hypothesis_id="H1",
+                location="backend/reference_frame.py:generate_keyframes:run_start",
+                message="fal_run_start",
+                data={"model": model, "frame_index": idx + 1},
+            )
+            # endregion agent log
             response = _with_retries(
                 lambda: client.run(model, arguments=arguments),
                 label="fal_keyframe_run",
             )
+            # region agent log
+            _debug_log(
+                hypothesis_id="H1",
+                location="backend/reference_frame.py:generate_keyframes:run_done",
+                message="fal_run_done",
+                data={"frame_index": idx + 1, "has_response": bool(response)},
+            )
+            # endregion agent log
             images = response.get("images") if isinstance(response, dict) else None
             image_url = images[0].get("url") if images else None
             if not image_url:
                 raise RuntimeError("Grok image response missing images[0].url")
+            # region agent log
+            _debug_log(
+                hypothesis_id="H2",
+                location="backend/reference_frame.py:generate_keyframes:download_start",
+                message="download_image_start",
+                data={"frame_index": idx + 1, "image_url_prefix": image_url[:48]},
+            )
+            # endregion agent log
             _download_image(image_url, output_path)
+            # region agent log
+            _debug_log(
+                hypothesis_id="H2",
+                location="backend/reference_frame.py:generate_keyframes:download_done",
+                message="download_image_done",
+                data={"frame_index": idx + 1, "output_path": str(output_path)},
+            )
+            # endregion agent log
             generated_paths.append(output_path)
         return generated_paths
     except Exception as exc:

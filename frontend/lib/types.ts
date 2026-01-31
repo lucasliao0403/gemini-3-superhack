@@ -3,6 +3,9 @@ export type ClipMoment = {
   start_ms?: number;
   peak_ms?: number;
   end_ms?: number;
+  beats?: { timestamp: string; caption: string }[];
+  beat_timestamps_ms?: number[];
+  beat_captions?: string[];
   type: string;
   description: string;
   players?: string[];
@@ -12,13 +15,18 @@ export type ClipMoment = {
   format_id?: number;
   assets?: {
     frame_url?: string;
+    frame_urls?: string[];
     ref_frame_url?: string;
+    generated_frame_urls?: string[];
     clip_url?: string;
     audio_url?: string;
   };
   prompts?: {
     image_prompt?: string;
+    frame_prompts?: string[];
     video_prompt?: string;
+    i2i_prompt_prefix?: string;
+    segment_script?: string;
   };
 };
 

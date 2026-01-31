@@ -46,6 +46,10 @@ FAL_VIDU_REFERENCE_MODEL = os.getenv(
     "FAL_VIDU_REFERENCE_MODEL",
     "fal-ai/vidu/reference-to-video",
 )
+FAL_VIDU_REFERENCE_Q1_MODEL = os.getenv(
+    "FAL_VIDU_REFERENCE_Q1_MODEL",
+    "fal-ai/vidu/q1/reference-to-video",
+)
 FAL_NANO_BANANA_MODEL = os.getenv("FAL_NANO_BANANA_MODEL", "fal-ai/nano-banana")
 FAL_NANO_BANANA_EDIT_MODEL = os.getenv(
     "FAL_NANO_BANANA_EDIT_MODEL",

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Who's Clip Is It?",
-  description: "AI-powered brainrot reel generator for sports highlights.",
+  title: "whose clip is it?",
+  description: "ai-powered brainrot reel generator for sports highlights.",
 };
 
 export default function RootLayout({
