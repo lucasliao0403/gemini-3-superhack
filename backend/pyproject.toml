@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whos-clip-is-it-backend"
+version = "0.1.0"
+description = "FastAPI backend for Who's Clip Is It?"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110.0",
+  "uvicorn>=0.27.0",
+  "python-multipart>=0.0.9",
+  "pydantic>=2.6.0",
+  "httpx>=0.26.0",
+  "python-dotenv>=1.0.1",
+  "google-genai>=0.6.0"
+]
+
+[tool.setuptools]
+py-modules = [
+  "asset_extraction",
+  "clip_detection",
+  "config",
+  "format_selection",
+  "generation",
+  "job_store",
+  "main",
+  "pipeline",
+  "postprocessing",
+  "video_analysis"
+]

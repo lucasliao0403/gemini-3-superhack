@@ -1,0 +1,16 @@
+asset_extraction.py
+clip_detection.py
+config.py
+format_selection.py
+generation.py
+job_store.py
+main.py
+pipeline.py
+postprocessing.py
+pyproject.toml
+video_analysis.py
+whos_clip_is_it_backend.egg-info/PKG-INFO
+whos_clip_is_it_backend.egg-info/SOURCES.txt
+whos_clip_is_it_backend.egg-info/dependency_links.txt
+whos_clip_is_it_backend.egg-info/requires.txt
+whos_clip_is_it_backend.egg-info/top_level.txt

@@ -1,0 +1,14 @@
+{
+  "name": "whos-clip-is-it",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "dev:backend": "npm --workspace backend run dev",
+    "lint:frontend": "npm --workspace frontend run lint"
+  }
+}

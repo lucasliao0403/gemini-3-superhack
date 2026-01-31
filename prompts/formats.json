@@ -1,0 +1,126 @@
+[
+  {
+    "id": 1,
+    "name": "Italian Brainrot Character",
+    "input_mode": "prompt_only",
+    "model": "minimax-hailuo",
+    "length_s": 6,
+    "prompt_template": "Create a short, absurd Italian brainrot character edit inspired by: {{description}}. Make it surreal and high energy.",
+    "requires_assets": ["character_refs"]
+  },
+  {
+    "id": 2,
+    "name": "Anime Betrayal",
+    "input_mode": "video_plus_prompt",
+    "model": "kling-o1-edit",
+    "length_s": 5,
+    "prompt_template": "Anime betrayal edit of this moment: {{description}}. Emphasize shock and dramatic reveal."
+  },
+  {
+    "id": 3,
+    "name": "Phonk/Cold Moments",
+    "input_mode": "video_plus_prompt",
+    "model": "kling-o1-edit",
+    "length_s": 8,
+    "prompt_template": "Cold phonk edit for a massive play: {{description}}. Slow zooms, contrast, hype mood."
+  },
+  {
+    "id": 4,
+    "name": "Subway Surfers Split",
+    "input_mode": "audio_plus_prompt",
+    "model": "kling-2.6-pro",
+    "length_s": 10,
+    "prompt_template": "Split-screen brainrot with a runner game vibe. Narrate the moment: {{description}}."
+  },
+  {
+    "id": 5,
+    "name": "Coach Rage Zoom",
+    "input_mode": "image_plus_prompt",
+    "model": "kling-2.5-turbo",
+    "length_s": 4,
+    "prompt_template": "Zoom-in reaction edit on coach rage. Describe: {{description}}."
+  },
+  {
+    "id": 6,
+    "name": "Ref Conspiracy",
+    "input_mode": "image_plus_prompt",
+    "model": "kling-2.5-turbo",
+    "length_s": 7,
+    "prompt_template": "Conspiracy style ref call edit for: {{description}}. Dramatic text overlays."
+  },
+  {
+    "id": 7,
+    "name": "Fake ESPN Segment",
+    "input_mode": "prompt_only",
+    "model": "minimax-hailuo",
+    "length_s": 8,
+    "prompt_template": "Create a fake ESPN segment about: {{description}}. Satirical broadcast tone."
+  },
+  {
+    "id": 8,
+    "name": "Bro Really Thought Meme",
+    "input_mode": "image_plus_prompt",
+    "model": "kling-2.5-turbo",
+    "length_s": 5,
+    "prompt_template": "Meme edit: \"Bro really thought\" about {{description}}. Emphasize failure."
+  },
+  {
+    "id": 9,
+    "name": "Sad Edit (Interstellar music)",
+    "input_mode": "video_plus_prompt",
+    "model": "kling-o1-edit",
+    "length_s": 10,
+    "prompt_template": "Sad cinematic edit of {{description}}. Slow motion, emotional tone.",
+    "requires_assets": ["music_bed"]
+  },
+  {
+    "id": 10,
+    "name": "Hype Edit (bass drop)",
+    "input_mode": "audio_plus_prompt",
+    "model": "kling-2.6-pro",
+    "length_s": 6,
+    "prompt_template": "Hype edit with bass drop for {{description}}. Punchy cuts and energy.",
+    "requires_assets": ["sfx_pack"]
+  },
+  {
+    "id": 11,
+    "name": "POV Format",
+    "input_mode": "prompt_only",
+    "model": "minimax-hailuo",
+    "length_s": 5,
+    "prompt_template": "POV: {{description}}. First-person, intense, quick cuts."
+  },
+  {
+    "id": 12,
+    "name": "AI News Parody",
+    "input_mode": "prompt_only",
+    "model": "minimax-hailuo",
+    "length_s": 8,
+    "prompt_template": "AI news parody report on: {{description}}. Deadpan anchor tone."
+  },
+  {
+    "id": 13,
+    "name": "He's Him Glory Edit",
+    "input_mode": "video_plus_prompt",
+    "model": "kling-o1-edit",
+    "length_s": 7,
+    "prompt_template": "He's Him glory edit for star dominance: {{description}}."
+  },
+  {
+    "id": 14,
+    "name": "Crowd Reaction Chaos",
+    "input_mode": "audio_plus_prompt",
+    "model": "kling-2.6-pro",
+    "length_s": 6,
+    "prompt_template": "Chaos edit based on crowd energy for: {{description}}.",
+    "requires_assets": ["sfx_pack"]
+  },
+  {
+    "id": 15,
+    "name": "Lore/Backstory Generator",
+    "input_mode": "prompt_only",
+    "model": "minimax-hailuo",
+    "length_s": 10,
+    "prompt_template": "Generate lore/backstory for the rivalry behind: {{description}}."
+  }
+]

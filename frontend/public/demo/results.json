@@ -1,0 +1,45 @@
+{
+  "job_id": "demo",
+  "status": "complete",
+  "stage": "done",
+  "progress": 100,
+  "message": "Demo reels ready",
+  "clips": [
+    {
+      "clip_id": "clip_1",
+      "type": "big_play",
+      "description": "Breakaway score with crowd explosion",
+      "players": ["Player A"],
+      "context": "Late lead change",
+      "announcer_energy": 9,
+      "crowd_energy": 9
+    },
+    {
+      "clip_id": "clip_2",
+      "type": "fail",
+      "description": "Red zone fumble swings momentum",
+      "players": ["Player B"],
+      "context": "Turnover after a long drive",
+      "announcer_energy": 7,
+      "crowd_energy": 6
+    }
+  ],
+  "outputs": [
+    {
+      "id": "clip_1_3",
+      "clip_id": "clip_1",
+      "format_id": 3,
+      "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "poster_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "duration_s": 8
+    },
+    {
+      "id": "clip_2_8",
+      "clip_id": "clip_2",
+      "format_id": 8,
+      "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "poster_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
+      "duration_s": 5
+    }
+  ]
+}
