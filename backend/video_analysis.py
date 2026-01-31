@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import time
 from pathlib import Path
 from typing import Any, Dict, List
@@ -11,6 +12,8 @@ try:
 except ImportError:  # pragma: no cover - optional until deps installed
     genai = None
 
+
+logger = logging.getLogger("whos-clip-is-it")
 
 CLIP_JSON_SCHEMA: Dict[str, Any] = {
     "type": "array",
@@ -112,6 +115,11 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
 
     client = genai.Client(api_key=config.GEMINI_API_KEY)
     try:
+        logger.info(
+            "gemini_upload_start model=%s reasoning=%s",
+            config.GEMINI_MODEL,
+            _thinking_level(),
+        )
         uploaded = client.files.upload(file=str(input_path))
 
         name = getattr(uploaded, "name", None)
@@ -119,11 +127,17 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
             deadline = time.time() + 120
             while time.time() < deadline:
                 current = client.files.get(name=name)
-                state = str(getattr(current, "state", "")).upper()
-                if state == "ACTIVE":
+                raw_state = getattr(current, "state", "")
+                if hasattr(raw_state, "name"):
+                    state = raw_state.name
+                else:
+                    state = str(raw_state)
+                state = state.upper()
+                logger.info("gemini_upload_state name=%s state=%s", name, state)
+                if "ACTIVE" in state:
                     uploaded = current
                     break
-                if state == "FAILED":
+                if "FAILED" in state:
                     raise RuntimeError("Gemini file processing failed")
                 time.sleep(1.5)
         base_config: Dict[str, Any] = {
@@ -140,6 +154,7 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
         try:
             clips = _parse_response(response.text or "")
         except Exception:
+            logger.warning("gemini_response_invalid_json retrying")
             repair_prompt = (
                 f"{prompt}\n\n"
                 "Return ONLY a valid JSON array matching the schema. "
@@ -154,6 +169,7 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
     finally:
         client.close()
 
+    logger.info("gemini_response_parsed clips=%s", len(clips))
     return {"prompt_used": bool(prompt), "clips": clips}
 
 

@@ -1,3 +1,4 @@
+import logging
 import shutil
 import subprocess
 from pathlib import Path
@@ -6,10 +7,13 @@ from typing import Any, Dict, List
 import config
 import job_store
 
+logger = logging.getLogger("whos-clip-is-it")
+
 
 def _run_ffmpeg(args: list[str]) -> None:
     result = subprocess.run(args, capture_output=True, text=True)
     if result.returncode != 0:
+        logger.error("ffmpeg_post_error stderr=%s", result.stderr.strip())
         raise RuntimeError(result.stderr.strip() or "ffmpeg failed")
 
 
@@ -34,9 +38,11 @@ def postprocess_reels(
         final_path = generated_path.parent / "final.mp4"
 
         if config.DEMO_MODE:
+            logger.info("postprocess_demo_copy clip_id=%s", clip_id)
             _copy_generated(generated_path, final_path)
         else:
             try:
+                logger.info("postprocess_start clip_id=%s", clip_id)
                 _run_ffmpeg(
                     [
                         config.FFMPEG_PATH,
@@ -51,6 +57,7 @@ def postprocess_reels(
                     ]
                 )
             except Exception:
+                logger.info("postprocess_fallback_copy clip_id=%s", clip_id)
                 _copy_generated(generated_path, final_path)
 
         clip = clips_by_id.get(clip_id, {})

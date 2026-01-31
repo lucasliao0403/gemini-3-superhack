@@ -1,13 +1,17 @@
+import logging
 import subprocess
 from pathlib import Path
 from typing import Dict
 
 import config
 
+logger = logging.getLogger("whos-clip-is-it")
+
 
 def _run_ffmpeg(args: list[str]) -> None:
     result = subprocess.run(args, capture_output=True, text=True)
     if result.returncode != 0:
+        logger.error("ffmpeg_error stderr=%s", result.stderr.strip())
         raise RuntimeError(result.stderr.strip() or "ffmpeg failed")
 
 
@@ -26,6 +30,7 @@ def probe_duration_ms(input_path: Path) -> int:
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "ffprobe failed")
     duration = float(result.stdout.strip())
+    logger.info("ffprobe_duration_ms duration=%s", int(duration * 1000))
     return int(duration * 1000)
 
 
@@ -35,6 +40,15 @@ def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> 
     start_s = clip["start_ms"] / 1000.0
     peak_s = clip["peak_ms"] / 1000.0
     end_s = clip["end_ms"] / 1000.0
+    clip_id = clip.get("clip_id", "unknown")
+
+    logger.info(
+        "ffmpeg_extract_start clip_id=%s start=%s peak=%s end=%s",
+        clip_id,
+        start_s,
+        peak_s,
+        end_s,
+    )
 
     frame_path = output_dir / "frame.png"
     clip_path = output_dir / "clip.mp4"
@@ -93,4 +107,5 @@ def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> 
         ]
     )
 
+    logger.info("ffmpeg_extract_done clip_id=%s", clip_id)
     return {"frame_path": frame_path, "clip_path": clip_path, "audio_path": audio_path}

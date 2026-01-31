@@ -2,18 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import { fetchJob, isDemoMode, withResolvedUrls } from "@/lib/api";
 import type { JobStatus } from "@/lib/types";
 
-type PageProps = {
-  params: { jobId: string };
-};
-
 const POLL_INTERVAL_MS = 1500;
 
-export default function JobPage({ params }: PageProps) {
-  const { jobId } = params;
+export default function JobPage() {
+  const params = useParams<{ jobId: string }>();
+  const jobId = params?.jobId || "";
   const [job, setJob] = useState<JobStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +22,9 @@ export default function JobPage({ params }: PageProps) {
   );
 
   useEffect(() => {
+    if (!jobId) {
+      return;
+    }
     let active = true;
     let interval: ReturnType<typeof setInterval> | null = null;
     let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -79,7 +80,7 @@ export default function JobPage({ params }: PageProps) {
         <Link className="button secondary" href="/">
           Back to upload
         </Link>
-        <span className="badge">Job {jobId}</span>
+        <span className="badge">Job {jobId || "..."}</span>
       </div>
 
       <div className="card stack">
