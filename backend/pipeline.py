@@ -16,6 +16,31 @@ import postprocessing
 import video_analysis
 
 logger = logging.getLogger("whos-clip-is-it")
+DEBUG_LOG_PATH = "/Users/lucasliao/Documents/GitHub/gemini-3-superhack/.cursor/debug.log"
+
+
+def _debug_log(
+    *,
+    hypothesis_id: str,
+    location: str,
+    message: str,
+    data: Dict[str, Any],
+    run_id: str = "run2",
+) -> None:
+    payload = {
+        "sessionId": "debug-session",
+        "runId": run_id,
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data,
+        "timestamp": int(time.time() * 1000),
+    }
+    try:
+        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload) + "\n")
+    except Exception:
+        pass
 
 def _write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -31,26 +56,61 @@ def _demo_assets(input_path: Path, output_dir: Path) -> Dict[str, Path]:
 
 def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     sanitized: List[Dict[str, Any]] = []
-    base_dir = job_store.job_dir(job_id)
+    # region agent log
+    _debug_log(
+        hypothesis_id="H5",
+        location="backend/pipeline.py:_sanitize_clips:entry",
+        message="sanitize_entry",
+        data={"job_id": job_id, "clip_count": len(clips)},
+    )
+    # endregion agent log
     for clip in clips:
         clip_copy = dict(clip)
         assets = clip_copy.get("assets") or {}
-        safe_assets = {}
-        for key, value in assets.items():
-            try:
-                safe_assets[key] = str(Path(value).relative_to(base_dir))
-            except Exception:
-                safe_assets[key] = str(value)
+        safe_assets: Dict[str, str] = {}
+        clip_id = clip_copy.get("clip_id")
+        if clip_id:
+            frame_path = assets.get("frame_path")
+            if frame_path and Path(frame_path).exists():
+                safe_assets["frame_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/frame.png"
+            clip_path = assets.get("clip_path")
+            if clip_path and Path(clip_path).exists():
+                safe_assets["clip_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/clip.mp4"
+            audio_path = assets.get("audio_path")
+            if audio_path and Path(audio_path).exists():
+                safe_assets["audio_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/audio.wav"
+        # region agent log
+        _debug_log(
+            hypothesis_id="H5",
+            location="backend/pipeline.py:_sanitize_clips:per_clip",
+            message="sanitize_clip_assets",
+            data={
+                "clip_id": clip_id,
+                "has_frame_path": bool(assets.get("frame_path")),
+                "has_clip_path": bool(assets.get("clip_path")),
+                "frame_url": safe_assets.get("frame_url"),
+                "clip_url": safe_assets.get("clip_url"),
+            },
+        )
+        # endregion agent log
         if safe_assets:
             clip_copy["assets"] = safe_assets
         sanitized.append(clip_copy)
+    # region agent log
+    _debug_log(
+        hypothesis_id="H5",
+        location="backend/pipeline.py:_sanitize_clips:exit",
+        message="sanitize_exit",
+        data={"job_id": job_id, "sanitized_count": len(sanitized)},
+    )
+    # endregion agent log
     return sanitized
 
 
 async def run_pipeline(job_id: str, input_path: Path) -> None:
     start_time = time.time()
     try:
-        logger.info("stage_start job_id=%s stage=analyzing", job_id)
+        print(f"stage_start job_id={job_id} stage=analyzing")
         job_store.update_job(
             job_id,
             status="running",
@@ -62,10 +122,9 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
         analysis = await video_analysis.analyze_video(input_path)
         job_dir = job_store.job_dir(job_id)
         _write_json(job_dir / "analysis.json", analysis)
-        logger.info(
-            "stage_end job_id=%s stage=analyzing duration_ms=%s",
-            job_id,
-            int((time.time() - start_time) * 1000),
+        print(
+            "stage_end "
+            f"job_id={job_id} stage=analyzing duration_ms={int((time.time() - start_time) * 1000)}"
         )
 
         duration_ms = None
@@ -78,7 +137,7 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
         clips = clip_detection.normalize_clips(raw_clips, duration_ms)
         if not clips:
             raise RuntimeError("No clips detected")
-        logger.info("clips_detected job_id=%s count=%s", job_id, len(clips))
+        print(f"clips_detected job_id={job_id} count={len(clips)}")
 
         for idx, clip in enumerate(clips, start=1):
             clip["clip_id"] = f"clip_{idx}"
@@ -91,7 +150,7 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             message="Extracting clip assets...",
             clips=_sanitize_clips(job_id, clips),
         )
-        logger.info("stage_start job_id=%s stage=extracting", job_id)
+        print(f"stage_start job_id={job_id} stage=extracting")
 
         for clip in clips:
             assets_dir = job_dir / "assets" / clip["clip_id"]
@@ -112,16 +171,15 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             progress=60,
             message="Selecting reel formats...",
         )
-        logger.info("stage_start job_id=%s stage=selecting_formats", job_id)
+        print(f"stage_start job_id={job_id} stage=selecting_formats")
 
         formats = format_selection.load_formats()
         formats_by_id = {int(f["id"]): f for f in formats}
         clips = format_selection.assign_format_ids(clips, formats_by_id)
         job_store.update_job(job_id, clips=_sanitize_clips(job_id, clips))
-        logger.info(
-            "formats_selected job_id=%s format_ids=%s",
-            job_id,
-            [clip.get("format_id") for clip in clips],
+        print(
+            "formats_selected "
+            f"job_id={job_id} format_ids={[clip.get('format_id') for clip in clips]}"
         )
 
         job_store.update_job(
@@ -130,10 +188,19 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             progress=70,
             message="Generating reels...",
         )
-        logger.info("stage_start job_id=%s stage=generating", job_id)
+        print(f"stage_start job_id={job_id} stage=generating")
 
         generated = await generation.generate_reels(job_id, clips, formats_by_id)
-        logger.info("stage_end job_id=%s stage=generating generated=%s", job_id, len(generated))
+        print(f"stage_end job_id={job_id} stage=generating generated={len(generated)}")
+        veo_debug = [
+            {
+                "clip_id": item.get("clip_id"),
+                "format_id": item.get("format_id"),
+                "veo_debug": item.get("veo_debug"),
+            }
+            for item in generated
+        ]
+        job_store.update_job(job_id, veo_debug=veo_debug)
 
         job_store.update_job(
             job_id,
@@ -141,7 +208,7 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             progress=92,
             message="Post-processing reels...",
         )
-        logger.info("stage_start job_id=%s stage=postprocessing", job_id)
+        print(f"stage_start job_id={job_id} stage=postprocessing")
 
         outputs = postprocessing.postprocess_reels(job_id, clips, formats_by_id, generated)
         public_outputs = []
@@ -169,11 +236,10 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             outputs=public_outputs,
             message="Complete",
         )
-        logger.info(
-            "pipeline_complete job_id=%s outputs=%s duration_ms=%s",
-            job_id,
-            len(public_outputs),
-            int((time.time() - start_time) * 1000),
+        print(
+            "pipeline_complete "
+            f"job_id={job_id} outputs={len(public_outputs)} "
+            f"duration_ms={int((time.time() - start_time) * 1000)}"
         )
     except Exception as exc:
         logger.exception("pipeline_failed job_id=%s error=%s", job_id, exc)

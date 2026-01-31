@@ -115,10 +115,9 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
 
     client = genai.Client(api_key=config.GEMINI_API_KEY)
     try:
-        logger.info(
-            "gemini_upload_start model=%s reasoning=%s",
-            config.GEMINI_MODEL,
-            _thinking_level(),
+        print(
+            "gemini_upload_start "
+            f"model={config.GEMINI_MODEL} reasoning={_thinking_level()}"
         )
         uploaded = client.files.upload(file=str(input_path))
 
@@ -133,7 +132,7 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
                 else:
                     state = str(raw_state)
                 state = state.upper()
-                logger.info("gemini_upload_state name=%s state=%s", name, state)
+                print(f"gemini_upload_state name={name} state={state}")
                 if "ACTIVE" in state:
                     uploaded = current
                     break
@@ -169,7 +168,7 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
     finally:
         client.close()
 
-    logger.info("gemini_response_parsed clips=%s", len(clips))
+    print(f"gemini_response_parsed clips={len(clips)}")
     return {"prompt_used": bool(prompt), "clips": clips}
 
 

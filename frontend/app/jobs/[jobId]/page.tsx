@@ -15,6 +15,7 @@ export default function JobPage() {
   const [job, setJob] = useState<JobStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoggedVeo, setHasLoggedVeo] = useState(false);
 
   const demoMode = useMemo(
     () => isDemoMode() || jobId === "demo",
@@ -67,6 +68,13 @@ export default function JobPage() {
     };
   }, [jobId, demoMode]);
 
+  useEffect(() => {
+    if (!hasLoggedVeo && job?.veo_debug) {
+      console.log("Veo debug", job.veo_debug);
+      setHasLoggedVeo(true);
+    }
+  }, [hasLoggedVeo, job?.veo_debug]);
+
   const statusClass =
     job?.status === "failed"
       ? "status error"
@@ -114,9 +122,32 @@ export default function JobPage() {
           <h2>Detected clips</h2>
           <div className="stack">
             {job.clips.map((clip, index) => (
-              <div key={`${clip.clip_id || index}`} className="row">
-                <span className="badge">{clip.type}</span>
-                <span>{clip.description}</span>
+              <div key={`${clip.clip_id || index}`} className="card stack">
+                <div className="row">
+                  <span className="badge">{clip.type}</span>
+                  {typeof clip.format_id === "number" && (
+                    <span className="badge">Format {clip.format_id}</span>
+                  )}
+                  <span>{clip.description}</span>
+                </div>
+                {(clip.assets?.frame_url || clip.assets?.clip_url) && (
+                  <div className="row">
+                    {clip.assets?.frame_url && (
+                      <img
+                        className="video"
+                        src={clip.assets.frame_url}
+                        alt={`Frame for ${clip.clip_id || "clip"}`}
+                      />
+                    )}
+                    {clip.assets?.clip_url && (
+                      <video
+                        className="video"
+                        controls
+                        src={clip.assets.clip_url}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

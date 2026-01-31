@@ -24,13 +24,28 @@ const resolveUrl = (path?: string | null) => {
 };
 
 export const withResolvedUrls = (job: JobStatus): JobStatus => {
-  if (!job.outputs) return job;
-  const outputs = job.outputs.map((output) => ({
+  const outputs = job.outputs?.map((output) => ({
     ...output,
     video_url: resolveUrl(output.video_url) || output.video_url,
     poster_url: resolveUrl(output.poster_url) || output.poster_url,
   }));
-  return { ...job, outputs };
+  const clips = job.clips?.map((clip) => {
+    if (!clip.assets) return clip;
+    return {
+      ...clip,
+      assets: {
+        ...clip.assets,
+        frame_url: resolveUrl(clip.assets.frame_url) || clip.assets.frame_url,
+        clip_url: resolveUrl(clip.assets.clip_url) || clip.assets.clip_url,
+        audio_url: resolveUrl(clip.assets.audio_url) || clip.assets.audio_url,
+      },
+    };
+  });
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/0d447818-e4a9-460e-8059-568a79d8680e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/lib/api.ts:withResolvedUrls',message:'resolved_job_assets',data:{jobId:job.job_id,clipCount:job.clips?.length ?? 0,firstClipAssets:clips?.[0]?.assets ?? null},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'H6'})}).catch(()=>{});
+  // #endregion
+  if (!outputs && !clips) return job;
+  return { ...job, outputs: outputs ?? job.outputs, clips: clips ?? job.clips };
 };
 
 export async function createJob(file: File): Promise<{ job_id: string }> {

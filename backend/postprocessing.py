@@ -38,11 +38,11 @@ def postprocess_reels(
         final_path = generated_path.parent / "final.mp4"
 
         if config.DEMO_MODE:
-            logger.info("postprocess_demo_copy clip_id=%s", clip_id)
+            print(f"postprocess_demo_copy clip_id={clip_id}")
             _copy_generated(generated_path, final_path)
         else:
             try:
-                logger.info("postprocess_start clip_id=%s", clip_id)
+                print(f"postprocess_start clip_id={clip_id}")
                 _run_ffmpeg(
                     [
                         config.FFMPEG_PATH,
@@ -57,7 +57,7 @@ def postprocess_reels(
                     ]
                 )
             except Exception:
-                logger.info("postprocess_fallback_copy clip_id=%s", clip_id)
+                print(f"postprocess_fallback_copy clip_id={clip_id}")
                 _copy_generated(generated_path, final_path)
 
         clip = clips_by_id.get(clip_id, {})

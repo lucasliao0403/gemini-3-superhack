@@ -30,7 +30,7 @@ def probe_duration_ms(input_path: Path) -> int:
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "ffprobe failed")
     duration = float(result.stdout.strip())
-    logger.info("ffprobe_duration_ms duration=%s", int(duration * 1000))
+    print(f"ffprobe_duration_ms duration={int(duration * 1000)}")
     return int(duration * 1000)
 
 
@@ -42,12 +42,9 @@ def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> 
     end_s = clip["end_ms"] / 1000.0
     clip_id = clip.get("clip_id", "unknown")
 
-    logger.info(
-        "ffmpeg_extract_start clip_id=%s start=%s peak=%s end=%s",
-        clip_id,
-        start_s,
-        peak_s,
-        end_s,
+    print(
+        "ffmpeg_extract_start "
+        f"clip_id={clip_id} start={start_s} peak={peak_s} end={end_s}"
     )
 
     frame_path = output_dir / "frame.png"
@@ -107,5 +104,5 @@ def extract_assets(input_path: Path, clip: Dict[str, int], output_dir: Path) -> 
         ]
     )
 
-    logger.info("ffmpeg_extract_done clip_id=%s", clip_id)
+    print(f"ffmpeg_extract_done clip_id={clip_id}")
     return {"frame_path": frame_path, "clip_path": clip_path, "audio_path": audio_path}

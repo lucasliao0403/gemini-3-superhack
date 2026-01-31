@@ -9,6 +9,12 @@ export type ClipMoment = {
   context?: string;
   announcer_energy?: number;
   crowd_energy?: number;
+  format_id?: number;
+  assets?: {
+    frame_url?: string;
+    clip_url?: string;
+    audio_url?: string;
+  };
 };
 
 export type ReelResult = {
@@ -29,4 +35,5 @@ export type JobStatus = {
   error?: { message: string };
   clips?: ClipMoment[];
   outputs?: ReelResult[];
+  veo_debug?: unknown;
 };

@@ -26,7 +26,10 @@ AI-powered sports highlight -> brainrot reels generator (monorepo).
 ## Environment
 Backend `.env` (optional):
 - `GEMINI_API_KEY`
-- `FAL_KEY`
+- `VEO_MODEL` (default `veo-3.1-fast-generate-preview`)
+- `VEO_ASPECT_RATIO` (default `9:16`)
+- `VEO_RESOLUTION` (default `720p`)
+- `VEO_MAX_CONCURRENCY` (default `1`)
 - `FFMPEG_PATH` (default `ffmpeg`)
 - `DEMO_MODE=1` to bypass real pipeline
 
@@ -36,4 +39,20 @@ Frontend `.env.local` (optional):
 
 ## Notes
 - MP4 only, <100MB only.
+- Fal AI has been replaced by Veo 3.1 generation (Gemini API).
+- Video-to-video generation is not implemented because Veo 3.1 in this workflow
+  only supports text-to-video and image-to-video inputs.
+- Supported `input_mode` values: `prompt_only`, `image_plus_prompt`.
+- Formats that specify `audio_plus_prompt` or `video_plus_prompt` fall back to
+  image-to-video when a freeze frame is available, otherwise text-to-video.
+- We could add a layer between format selection and generation that expands a
+  format-level template into a scene-specific prompt before sending it to Veo,
+  instead of relying on mostly hard-coded prompt templates.
 - Demo mode is intended for local UI development without API keys.
+
+## Testing checklist
+- With `GEMINI_API_KEY` set, run a full job and confirm logs show Veo polling,
+  generation completion, postprocessing, and job completion.
+- Load the job page and verify each detected clip shows the frame image beside
+  the extracted clip video.
+- Confirm reel outputs are Veo-generated mp4s (not copied clips).

@@ -25,7 +25,10 @@ DEMO_MODE = os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
 GEMINI_REASONING = os.getenv("GEMINI_REASONING", "medium")
-FAL_KEY = os.getenv("FAL_KEY")
+VEO_MODEL = os.getenv("VEO_MODEL", "veo-3.1-fast-generate-preview")
+VEO_ASPECT_RATIO = os.getenv("VEO_ASPECT_RATIO", "9:16")
+VEO_RESOLUTION = os.getenv("VEO_RESOLUTION", "720p")
+VEO_MAX_CONCURRENCY = int(os.getenv("VEO_MAX_CONCURRENCY", "1"))
 
 FFMPEG_PATH = os.getenv("FFMPEG_PATH", "ffmpeg")
 FFPROBE_PATH = os.getenv("FFPROBE_PATH", "ffprobe")

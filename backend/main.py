@@ -60,7 +60,7 @@ async def create_job(file: UploadFile = File(...)) -> dict[str, Any]:
     _validate_upload(file)
 
     job_id = uuid.uuid4().hex
-    logger.info("job_created job_id=%s filename=%s", job_id, file.filename)
+    print(f"job_created job_id={job_id} filename={file.filename}")
     job_store.create_job(job_id, original_filename=file.filename or "upload.mp4")
     input_path = job_store.job_input_path(job_id)
     input_path.parent.mkdir(parents=True, exist_ok=True)
@@ -71,7 +71,7 @@ async def create_job(file: UploadFile = File(...)) -> dict[str, Any]:
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
-    logger.info("upload_saved job_id=%s bytes=%s path=%s", job_id, size, input_path)
+    print(f"upload_saved job_id={job_id} bytes={size} path={input_path}")
 
     job_store.update_job(
         job_id,
@@ -80,7 +80,7 @@ async def create_job(file: UploadFile = File(...)) -> dict[str, Any]:
         message="Queued for processing",
     )
 
-    logger.info("pipeline_start job_id=%s", job_id)
+    print(f"pipeline_start job_id={job_id}")
     asyncio.create_task(pipeline.run_pipeline(job_id, input_path))
     return {"job_id": job_id}
 
