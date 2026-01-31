@@ -27,7 +27,7 @@ AI-powered sports highlight -> brainrot reels generator (monorepo).
 Backend `.env` (optional):
 - `GEMINI_API_KEY` (clip detection + prompt writing)
 - `FAL_KEY` (video generation)
-- `FAL_DEFAULT_MODEL` (default `fal-ai/wan/v2.2-a14b/video-to-video`)
+- `FAL_DEFAULT_MODEL` (default `xai/grok-imagine-video/edit-video`)
 - `FAL_ASPECT_RATIO` (default `9:16`)
 - `FAL_RESOLUTION` (default `720p`)
 - `FAL_FPS` (default `16`)
@@ -45,7 +45,7 @@ Frontend `.env.local` (optional):
 ## Notes
 - MP4 only, <100MB only.
 - Pipeline overview: upload mp4 -> Gemini clip detection/prompts -> extract clip mp4s
-  -> FAL video-to-video generates reels.
+  -> Grok Imagine video-to-video generates reels.
 - Supported `input_mode` values: `prompt_only`, `image_plus_prompt`, `video_plus_prompt`.
 - Formats that specify `audio_plus_prompt` or `image_plus_prompt` fall back to
   video-to-video using the extracted clip mp4 when available.

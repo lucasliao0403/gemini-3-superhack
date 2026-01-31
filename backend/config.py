@@ -30,11 +30,22 @@ GEMINI_REASONING = os.getenv("GEMINI_REASONING", "medium")
 NANO_BANANA_MODEL = os.getenv("NANO_BANANA_MODEL", "gemini-2.5-flash-image")
 NANO_BANANA_ASPECT_RATIO = os.getenv("NANO_BANANA_ASPECT_RATIO", "9:16")
 FAL_KEY = os.getenv("FAL_KEY")
-FAL_DEFAULT_MODEL = os.getenv("FAL_DEFAULT_MODEL", "fal-ai/wan/v2.2-a14b/video-to-video")
+FAL_DEFAULT_MODEL = os.getenv(
+    "FAL_DEFAULT_MODEL", "xai/grok-imagine-video/edit-video"
+)
 FAL_ASPECT_RATIO = os.getenv("FAL_ASPECT_RATIO", "9:16")
 FAL_RESOLUTION = os.getenv("FAL_RESOLUTION", "720p")
 FAL_FPS = int(os.getenv("FAL_FPS", "16"))
 FAL_MAX_CONCURRENCY = int(os.getenv("FAL_MAX_CONCURRENCY", "1"))
+FAL_GROK_IMAGE_MODEL = os.getenv("FAL_GROK_IMAGE_MODEL", "xai/grok-imagine-image")
+FAL_GROK_IMAGE_EDIT_MODEL = os.getenv(
+    "FAL_GROK_IMAGE_EDIT_MODEL",
+    "xai/grok-imagine-image/edit",
+)
+FAL_VIDU_REFERENCE_MODEL = os.getenv(
+    "FAL_VIDU_REFERENCE_MODEL",
+    "fal-ai/vidu/reference-to-video",
+)
 FAL_NANO_BANANA_MODEL = os.getenv("FAL_NANO_BANANA_MODEL", "fal-ai/nano-banana")
 FAL_NANO_BANANA_EDIT_MODEL = os.getenv(
     "FAL_NANO_BANANA_EDIT_MODEL",

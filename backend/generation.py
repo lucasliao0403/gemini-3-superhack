@@ -11,6 +11,7 @@ import httpx
 
 logger = logging.getLogger("whos-clip-is-it")
 DEBUG_LOG_PATH = "/Users/lucasliao/Documents/GitHub/gemini-3-superhack/.cursor/debug.log"
+MAX_FAL_RETRIES = 5
 
 
 def _debug_log(
@@ -35,6 +36,24 @@ def _debug_log(
             handle.write(json.dumps(payload) + "\n")
     except Exception:
         pass
+
+
+def _with_retries(action, *, label: str) -> Any:
+    last_exc = None
+    for attempt in range(1, MAX_FAL_RETRIES + 1):
+        try:
+            return action()
+        except Exception as exc:
+            last_exc = exc
+            logger.warning(
+                "fal_retry_failed label=%s attempt=%s error=%s",
+                label,
+                attempt,
+                repr(exc),
+            )
+            if attempt < MAX_FAL_RETRIES:
+                time.sleep(min(2 ** (attempt - 1), 8))
+    raise last_exc  # type: ignore[misc]
 
 
 def _serialize_payload(value: Any, depth: int = 0, max_depth: int = 4) -> Any:
@@ -113,11 +132,14 @@ def _select_video_input(
 
 def _download_to_path(url: str, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with httpx.stream("GET", url, timeout=300) as response:
-        response.raise_for_status()
-        with output_path.open("wb") as handle:
-            for chunk in response.iter_bytes():
-                handle.write(chunk)
+    def _download() -> None:
+        with httpx.stream("GET", url, timeout=300) as response:
+            response.raise_for_status()
+            with output_path.open("wb") as handle:
+                for chunk in response.iter_bytes():
+                    handle.write(chunk)
+
+    _with_retries(_download, label="fal_download")
 
 
 def _generate_with_fal_sync(
@@ -126,9 +148,9 @@ def _generate_with_fal_sync(
     format_id: int,
     prompt: str,
     model: str,
-    duration_s: int,
     output_path: Path,
-    clip_path: Path,
+    reference_paths: List[Path],
+    movement_amplitude: str,
 ) -> Tuple[Path, Dict[str, Any]]:
     if fal_client is None:
         raise RuntimeError("fal-client is not installed")
@@ -136,14 +158,11 @@ def _generate_with_fal_sync(
         raise RuntimeError("Missing FAL_KEY")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    num_frames = _map_num_frames(duration_s, config.FAL_FPS)
     request_payload = {
-        "video_url": None,
         "prompt": prompt,
-        "num_frames": num_frames,
-        "frames_per_second": config.FAL_FPS,
         "aspect_ratio": config.FAL_ASPECT_RATIO,
-        "resolution": config.FAL_RESOLUTION,
+        "movement_amplitude": movement_amplitude,
+        "reference_image_urls": [],
     }
     # region agent log
     _debug_log(
@@ -155,22 +174,27 @@ def _generate_with_fal_sync(
             "clip_id": clip_id,
             "format_id": format_id,
             "model": model,
-            "duration_s": duration_s,
-            "clip_path": str(clip_path),
-            "clip_exists": clip_path.exists(),
-            "num_frames": num_frames,
+            "reference_count": len(reference_paths),
+            "movement_amplitude": movement_amplitude,
         },
     )
     # endregion agent log
     client = fal_client.SyncClient(key=config.FAL_KEY)
     try:
-        upload_url = client.upload_file(clip_path)
-        request_payload["video_url"] = upload_url
+        reference_urls = []
+        for path in reference_paths:
+            reference_urls.append(
+                _with_retries(lambda: client.upload_file(path), label="fal_upload_file")
+            )
+        request_payload["reference_image_urls"] = reference_urls
         print(
             "fal_generation_start "
             f"job_id={job_id} clip_id={clip_id} format_id={format_id} model={model}"
         )
-        response = client.run(model, arguments=request_payload)
+        response = _with_retries(
+            lambda: client.run(model, arguments=request_payload),
+            label="fal_run",
+        )
         video_info = response.get("video") if isinstance(response, dict) else None
         video_url = video_info.get("url") if isinstance(video_info, dict) else None
         if not video_url:
@@ -223,22 +247,15 @@ async def generate_reels(
                 prompt = clip_prompts.get("video_prompt") or _render_prompt(
                     format_data.get("prompt_template", ""), clip
                 )
-                duration_s = _map_duration_seconds(format_data.get("length_s"))
                 assets = clip.get("assets") or {}
-                clip_path = Path(assets["clip_path"]) if assets.get("clip_path") else None
-                _, selected_clip, fallback = _select_video_input(
-                    str(format_data.get("input_mode", "")).strip(),
-                    clip_path,
-                )
-                if fallback:
-                    print(
-                        "fal_generation_fallback "
-                        f"job_id={job_id} clip_id={clip.get('clip_id')} "
-                        f"format_id={format_id} reason={fallback}"
-                    )
-                if not selected_clip:
-                    raise RuntimeError("Missing clip video for FAL video-to-video")
-                model = str(format_data.get("model") or config.FAL_DEFAULT_MODEL).strip()
+                generated_frame_paths = assets.get("generated_frame_paths")
+                if not isinstance(generated_frame_paths, list) or len(generated_frame_paths) < 2:
+                    raise RuntimeError("Missing generated keyframes for Vidu reference-to-video")
+                reference_paths = [Path(path) for path in generated_frame_paths]
+                model = str(
+                    format_data.get("model") or config.FAL_VIDU_REFERENCE_MODEL
+                ).strip()
+                movement_amplitude = str(format_data.get("movement_amplitude", "auto"))
                 generated_path, fal_debug = await asyncio.to_thread(
                     _generate_with_fal_sync,
                     job_id,
@@ -246,9 +263,9 @@ async def generate_reels(
                     format_id,
                     prompt,
                     model,
-                    duration_s,
                     output_dir / "generated.mp4",
-                    selected_clip,
+                    reference_paths,
+                    movement_amplitude,
                 )
             except Exception:
                 logger.exception(

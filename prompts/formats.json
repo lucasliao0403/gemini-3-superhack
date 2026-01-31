@@ -3,7 +3,7 @@
     "id": 1,
     "name": "Anime highlight from a different angle",
     "input_mode": "video_plus_prompt",
-    "model": "fal-ai/wan/v2.2-a14b/video-to-video",
+    "model": "xai/grok-imagine-video/edit-video",
     "length_s": 6,
     "prompt_reference": "Generate a highly accurate anime rendition of this scene from an angle where the face of the star player can be seen. Turn this into a dramatic anime scene where {description} is happening, highly stylized and pay attention to details.",
     "prompt_template": "Anime highlight edit of this moment: {{description}}. Emphasize drama and intensity.",

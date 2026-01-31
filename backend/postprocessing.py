@@ -68,7 +68,10 @@ def postprocess_reels(
 
         poster_path = None
         assets = clip.get("assets") or {}
-        if "frame_path" in assets:
+        generated_frame_paths = assets.get("generated_frame_paths")
+        if isinstance(generated_frame_paths, list) and generated_frame_paths:
+            poster_path = Path(generated_frame_paths[0])
+        elif "frame_path" in assets:
             poster_path = Path(assets["frame_path"])
 
         outputs.append(

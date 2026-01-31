@@ -57,6 +57,12 @@ CLIP_JSON_SCHEMA: Dict[str, Any] = {
             "context": {"type": "string"},
             "announcer_energy": {"type": "integer", "minimum": 1, "maximum": 10},
             "crowd_energy": {"type": "integer", "minimum": 1, "maximum": 10},
+            "generated_storyboard_frames": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {"type": "string"},
+            },
         },
     },
 }
@@ -82,6 +88,14 @@ def _mock_analysis() -> List[Dict[str, Any]]:
             "context": "Gives the team a late lead in the 4th quarter",
             "announcer_energy": 9,
             "crowd_energy": 9,
+            "generated_storyboard_frames": [
+                "Wide anime stadium view as Player A breaks free toward the end zone",
+                "Tracking close-up as Player A dodges a defender with motion streaks",
+                "Low-angle shot as a tackle attempt whiffs, turf spraying",
+                "Heroic mid-shot with the crowd blurred and dramatic lighting",
+                "Goal-line view as Player A dives across the line",
+                "Celebration freeze with teammates rushing in, anime glow effects",
+            ],
         },
         {
             "start": "08:12",
@@ -93,6 +107,14 @@ def _mock_analysis() -> List[Dict[str, Any]]:
             "context": "Momentum swing after a promising drive",
             "announcer_energy": 7,
             "crowd_energy": 6,
+            "generated_storyboard_frames": [
+                "Wide anime stadium view as the QB winds up",
+                "Close-up as the ball leaves the QB's hand with streaking lines",
+                "Mid-shot as the defender breaks on the route",
+                "Low-angle as the interception happens with dramatic lighting",
+                "Reaction shot of the QB as the crowd erupts",
+                "Celebration freeze of the defense with stylized sparks",
+            ],
         },
     ]
 

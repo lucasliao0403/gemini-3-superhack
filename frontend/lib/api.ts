@@ -36,6 +36,8 @@ export const withResolvedUrls = (job: JobStatus): JobStatus => {
       assets: {
         ...clip.assets,
         frame_url: resolveUrl(clip.assets.frame_url) || clip.assets.frame_url,
+        ref_frame_url:
+          resolveUrl(clip.assets.ref_frame_url) || clip.assets.ref_frame_url,
         clip_url: resolveUrl(clip.assets.clip_url) || clip.assets.clip_url,
         audio_url: resolveUrl(clip.assets.audio_url) || clip.assets.audio_url,
       },

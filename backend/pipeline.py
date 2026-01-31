@@ -100,12 +100,34 @@ def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, 
         if clip_id:
             frame_path = assets.get("frame_path")
             if frame_path and Path(frame_path).exists():
-                safe_assets["frame_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/frame.png"
+                safe_assets["frame_url"] = (
+                    f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(frame_path).name}"
+                )
+            frame_paths = assets.get("frame_paths")
+            if isinstance(frame_paths, list):
+                frame_urls = []
+                for path in frame_paths:
+                    if path and Path(path).exists():
+                        frame_urls.append(
+                            f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(path).name}"
+                        )
+                if frame_urls:
+                    safe_assets["frame_urls"] = frame_urls
             ref_frame_path = assets.get("ref_frame_path")
             if ref_frame_path and Path(ref_frame_path).exists():
                 safe_assets["ref_frame_url"] = (
-                    f"/api/jobs/{job_id}/outputs/assets/{clip_id}/ref_frame.png"
+                    f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(ref_frame_path).name}"
                 )
+            generated_frame_paths = assets.get("generated_frame_paths")
+            if isinstance(generated_frame_paths, list):
+                generated_urls = []
+                for path in generated_frame_paths:
+                    if path and Path(path).exists():
+                        generated_urls.append(
+                            f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(path).name}"
+                        )
+                if generated_urls:
+                    safe_assets["generated_frame_urls"] = generated_urls
             clip_path = assets.get("clip_path")
             if clip_path and Path(clip_path).exists():
                 safe_assets["clip_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/clip.mp4"
@@ -264,21 +286,22 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             job_id,
             stage="ref_frames",
             progress=65,
-            message="Generating reference frames...",
+            message="Generating keyframes...",
         )
         print(f"stage_start job_id={job_id} stage=ref_frames")
 
         for idx, clip in enumerate(clips, start=1):
-            ref_frame_path = reference_frame.generate_reference_frame(
+            generated_paths = reference_frame.generate_keyframes(
                 job_id, clip, formats_by_id
             )
-            if ref_frame_path:
+            if generated_paths:
                 assets = clip.get("assets") or {}
-                assets["ref_frame_path"] = ref_frame_path
+                assets["generated_frame_paths"] = generated_paths
+                assets["ref_frame_path"] = generated_paths[0]
                 clip["assets"] = assets
             job_store.update_job(
                 job_id,
-                message=f"Generating {clip['clip_id']} reference frame...",
+                message=f"Generating {clip['clip_id']} keyframes...",
                 progress=min(69, 65 + int(5 * (idx / len(clips)))),
             )
         job_store.update_job(job_id, clips=_sanitize_clips(job_id, clips))
