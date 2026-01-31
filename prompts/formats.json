@@ -1,59 +1,12 @@
 [
   {
     "id": 1,
-    "name": "Italian Brainrot Character",
-    "input_mode": "prompt_only",
-    "model": "minimax-hailuo",
+    "name": "Anime highlight from a different angle",
+    "input_mode": "video_plus_prompt",
+    "model": "fal-ai/wan/v2.2-a14b/video-to-video",
     "length_s": 6,
-    "prompt_template": "Create a short, absurd Italian brainrot character edit inspired by: {{description}}. Make it surreal and high energy.",
-    "requires_assets": ["character_refs"]
-  },
-  {
-    "id": 2,
-    "name": "Anime Betrayal",
-    "input_mode": "video_plus_prompt",
-    "model": "kling-o1-edit",
-    "length_s": 5,
-    "prompt_template": "Anime betrayal edit of this moment: {{description}}. Emphasize shock and dramatic reveal."
-  },
-  {
-    "id": 6,
-    "name": "Ref Conspiracy",
-    "input_mode": "image_plus_prompt",
-    "model": "kling-2.5-turbo",
-    "length_s": 7,
-    "prompt_template": "Conspiracy style ref call edit for: {{description}}. Dramatic text overlays."
-  },
-  {
-    "id": 7,
-    "name": "Fake ESPN Segment",
-    "input_mode": "prompt_only",
-    "model": "minimax-hailuo",
-    "length_s": 8,
-    "prompt_template": "Create a fake ESPN segment about: {{description}}. Satirical broadcast tone."
-  },
-  {
-    "id": 12,
-    "name": "AI News Parody",
-    "input_mode": "prompt_only",
-    "model": "minimax-hailuo",
-    "length_s": 8,
-    "prompt_template": "AI news parody report on: {{description}}. Deadpan anchor tone."
-  },
-  {
-    "id": 13,
-    "name": "He's Him Glory Edit",
-    "input_mode": "video_plus_prompt",
-    "model": "kling-o1-edit",
-    "length_s": 7,
-    "prompt_template": "He's Him glory edit for star dominance: {{description}}."
-  },
-  {
-    "id": 15,
-    "name": "Lore/Backstory Generator",
-    "input_mode": "prompt_only",
-    "model": "minimax-hailuo",
-    "length_s": 10,
-    "prompt_template": "Generate lore/backstory for the rivalry behind: {{description}}."
+    "prompt_reference": "Generate a highly accurate anime rendition of this scene from an angle where the face of the star player can be seen. Turn this into a dramatic anime scene where {description} is happening, highly stylized and pay attention to details.",
+    "prompt_template": "Anime highlight edit of this moment: {{description}}. Emphasize drama and intensity.",
+    "ref_frame_prompt": "Anime-style football highlight still frame. Show the action clearly: {description}. Vertical 9:16."
   }
 ]

@@ -7,11 +7,13 @@ except ImportError:  # pragma: no cover - optional until deps installed
     load_dotenv = None
 
 
-if load_dotenv:
-    load_dotenv()
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent
+
+if load_dotenv:
+    # Prefer backend/.env, then repo-root .env as a fallback.
+    load_dotenv(BACKEND_DIR / ".env")
+    load_dotenv(BASE_DIR / ".env")
 TEMP_DIR = BASE_DIR / "temp"
 JOBS_DIR = TEMP_DIR / "jobs"
 PROMPTS_DIR = BASE_DIR / "prompts"
@@ -25,10 +27,20 @@ DEMO_MODE = os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
 GEMINI_REASONING = os.getenv("GEMINI_REASONING", "medium")
-VEO_MODEL = os.getenv("VEO_MODEL", "veo-3.1-fast-generate-preview")
-VEO_ASPECT_RATIO = os.getenv("VEO_ASPECT_RATIO", "9:16")
-VEO_RESOLUTION = os.getenv("VEO_RESOLUTION", "720p")
-VEO_MAX_CONCURRENCY = int(os.getenv("VEO_MAX_CONCURRENCY", "1"))
+NANO_BANANA_MODEL = os.getenv("NANO_BANANA_MODEL", "gemini-2.5-flash-image")
+NANO_BANANA_ASPECT_RATIO = os.getenv("NANO_BANANA_ASPECT_RATIO", "9:16")
+FAL_KEY = os.getenv("FAL_KEY")
+FAL_DEFAULT_MODEL = os.getenv("FAL_DEFAULT_MODEL", "fal-ai/wan/v2.2-a14b/video-to-video")
+FAL_ASPECT_RATIO = os.getenv("FAL_ASPECT_RATIO", "9:16")
+FAL_RESOLUTION = os.getenv("FAL_RESOLUTION", "720p")
+FAL_FPS = int(os.getenv("FAL_FPS", "16"))
+FAL_MAX_CONCURRENCY = int(os.getenv("FAL_MAX_CONCURRENCY", "1"))
+FAL_NANO_BANANA_MODEL = os.getenv("FAL_NANO_BANANA_MODEL", "fal-ai/nano-banana")
+FAL_NANO_BANANA_EDIT_MODEL = os.getenv(
+    "FAL_NANO_BANANA_EDIT_MODEL",
+    "fal-ai/nano-banana/edit",
+)
+FAL_NANO_BANANA_ASPECT_RATIO = os.getenv("FAL_NANO_BANANA_ASPECT_RATIO", "9:16")
 
 FFMPEG_PATH = os.getenv("FFMPEG_PATH", "ffmpeg")
 FFPROBE_PATH = os.getenv("FFPROBE_PATH", "ffprobe")

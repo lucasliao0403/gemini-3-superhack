@@ -13,6 +13,8 @@ import format_selection
 import generation
 import job_store
 import postprocessing
+import prompt_writer
+import reference_frame
 import video_analysis
 
 logger = logging.getLogger("whos-clip-is-it")
@@ -42,9 +44,35 @@ def _debug_log(
     except Exception:
         pass
 
+def _json_default(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
+    raise TypeError(f"Object of type {value.__class__.__name__} is not JSON serializable")
+
+
 def _write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2))
+    # region agent log
+    _debug_log(
+        hypothesis_id="H1",
+        location="backend/pipeline.py:_write_json:pre",
+        message="write_json_pre",
+        data={
+            "path": str(path),
+            "data_type": type(data).__name__,
+            "has_clips_key": isinstance(data, dict) and "clips" in data,
+        },
+    )
+    # endregion agent log
+    path.write_text(json.dumps(data, indent=2, default=_json_default))
+    # region agent log
+    _debug_log(
+        hypothesis_id="H1",
+        location="backend/pipeline.py:_write_json:post",
+        message="write_json_post",
+        data={"path": str(path)},
+    )
+    # endregion agent log
 
 
 def _demo_assets(input_path: Path, output_dir: Path) -> Dict[str, Path]:
@@ -73,6 +101,11 @@ def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, 
             frame_path = assets.get("frame_path")
             if frame_path and Path(frame_path).exists():
                 safe_assets["frame_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/frame.png"
+            ref_frame_path = assets.get("ref_frame_path")
+            if ref_frame_path and Path(ref_frame_path).exists():
+                safe_assets["ref_frame_url"] = (
+                    f"/api/jobs/{job_id}/outputs/assets/{clip_id}/ref_frame.png"
+                )
             clip_path = assets.get("clip_path")
             if clip_path and Path(clip_path).exists():
                 safe_assets["clip_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/clip.mp4"
@@ -184,6 +217,74 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
 
         job_store.update_job(
             job_id,
+            stage="writing_prompts",
+            progress=63,
+            message="Writing prompts...",
+        )
+        print(f"stage_start job_id={job_id} stage=writing_prompts")
+        for idx, clip in enumerate(clips, start=1):
+            format_id = int(clip.get("format_id", 1))
+            format_data = formats_by_id.get(format_id, {})
+            prompts = prompt_writer.write_prompts(
+                job_id=job_id,
+                clip=clip,
+                format_data=format_data,
+            )
+            if prompts:
+                clip["prompts"] = prompts
+            job_store.update_job(
+                job_id,
+                message=f"Writing {clip['clip_id']} prompts...",
+                progress=min(64, 63 + int(1 * (idx / len(clips)))),
+            )
+        job_store.update_job(job_id, clips=_sanitize_clips(job_id, clips))
+        # region agent log
+        clip_asset_types = []
+        for clip in clips:
+            assets = clip.get("assets") or {}
+            clip_asset_types.append(
+                {
+                    "clip_id": clip.get("clip_id"),
+                    "asset_value_types": {k: type(v).__name__ for k, v in assets.items()},
+                }
+            )
+        _debug_log(
+            hypothesis_id="H2",
+            location="backend/pipeline.py:run_pipeline:pre_prompts_write",
+            message="pre_write_prompts_json",
+            data={
+                "clip_count": len(clips),
+                "asset_types": clip_asset_types,
+            },
+        )
+        # endregion agent log
+        _write_json(job_dir / "prompts.json", {"clips": clips})
+
+        job_store.update_job(
+            job_id,
+            stage="ref_frames",
+            progress=65,
+            message="Generating reference frames...",
+        )
+        print(f"stage_start job_id={job_id} stage=ref_frames")
+
+        for idx, clip in enumerate(clips, start=1):
+            ref_frame_path = reference_frame.generate_reference_frame(
+                job_id, clip, formats_by_id
+            )
+            if ref_frame_path:
+                assets = clip.get("assets") or {}
+                assets["ref_frame_path"] = ref_frame_path
+                clip["assets"] = assets
+            job_store.update_job(
+                job_id,
+                message=f"Generating {clip['clip_id']} reference frame...",
+                progress=min(69, 65 + int(5 * (idx / len(clips)))),
+            )
+        job_store.update_job(job_id, clips=_sanitize_clips(job_id, clips))
+
+        job_store.update_job(
+            job_id,
             stage="generating",
             progress=70,
             message="Generating reels...",
@@ -192,15 +293,15 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
 
         generated = await generation.generate_reels(job_id, clips, formats_by_id)
         print(f"stage_end job_id={job_id} stage=generating generated={len(generated)}")
-        veo_debug = [
+        fal_debug = [
             {
                 "clip_id": item.get("clip_id"),
                 "format_id": item.get("format_id"),
-                "veo_debug": item.get("veo_debug"),
+                "fal_debug": item.get("fal_debug"),
             }
             for item in generated
         ]
-        job_store.update_job(job_id, veo_debug=veo_debug)
+        job_store.update_job(job_id, fal_debug=fal_debug)
 
         job_store.update_job(
             job_id,

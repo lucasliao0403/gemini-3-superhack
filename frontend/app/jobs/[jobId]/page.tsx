@@ -15,7 +15,7 @@ export default function JobPage() {
   const [job, setJob] = useState<JobStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoggedVeo, setHasLoggedVeo] = useState(false);
+  const [hasLoggedFal, setHasLoggedFal] = useState(false);
 
   const demoMode = useMemo(
     () => isDemoMode() || jobId === "demo",
@@ -69,11 +69,11 @@ export default function JobPage() {
   }, [jobId, demoMode]);
 
   useEffect(() => {
-    if (!hasLoggedVeo && job?.veo_debug) {
-      console.log("Veo debug", job.veo_debug);
-      setHasLoggedVeo(true);
+    if (!hasLoggedFal && job?.fal_debug) {
+      console.log("FAL debug", job.fal_debug);
+      setHasLoggedFal(true);
     }
-  }, [hasLoggedVeo, job?.veo_debug]);
+  }, [hasLoggedFal, job?.fal_debug]);
 
   const statusClass =
     job?.status === "failed"
@@ -130,8 +130,17 @@ export default function JobPage() {
                   )}
                   <span>{clip.description}</span>
                 </div>
-                {(clip.assets?.frame_url || clip.assets?.clip_url) && (
+                {(clip.assets?.frame_url ||
+                  clip.assets?.ref_frame_url ||
+                  clip.assets?.clip_url) && (
                   <div className="row">
+                    {clip.assets?.ref_frame_url && (
+                      <img
+                        className="video"
+                        src={clip.assets.ref_frame_url}
+                        alt={`Reference frame for ${clip.clip_id || "clip"}`}
+                      />
+                    )}
                     {clip.assets?.frame_url && (
                       <img
                         className="video"
@@ -145,6 +154,22 @@ export default function JobPage() {
                         controls
                         src={clip.assets.clip_url}
                       />
+                    )}
+                  </div>
+                )}
+                {(clip.prompts?.image_prompt || clip.prompts?.video_prompt) && (
+                  <div className="stack">
+                    {clip.prompts?.image_prompt && (
+                      <div className="stack">
+                        <span className="subtitle">Image prompt</span>
+                        <pre className="code">{clip.prompts.image_prompt}</pre>
+                      </div>
+                    )}
+                    {clip.prompts?.video_prompt && (
+                      <div className="stack">
+                        <span className="subtitle">Video prompt</span>
+                        <pre className="code">{clip.prompts.video_prompt}</pre>
+                      </div>
                     )}
                   </div>
                 )}

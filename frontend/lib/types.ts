@@ -12,8 +12,13 @@ export type ClipMoment = {
   format_id?: number;
   assets?: {
     frame_url?: string;
+    ref_frame_url?: string;
     clip_url?: string;
     audio_url?: string;
+  };
+  prompts?: {
+    image_prompt?: string;
+    video_prompt?: string;
   };
 };
 
@@ -35,5 +40,5 @@ export type JobStatus = {
   error?: { message: string };
   clips?: ClipMoment[];
   outputs?: ReelResult[];
-  veo_debug?: unknown;
+  fal_debug?: unknown;
 };

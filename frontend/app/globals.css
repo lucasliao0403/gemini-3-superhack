@@ -163,3 +163,14 @@ h2 {
   border-radius: 12px;
   border: 1px solid var(--border);
 }
+
+.code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}

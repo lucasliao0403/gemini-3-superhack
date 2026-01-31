@@ -9,11 +9,15 @@ import config
 
 try:
     from google import genai
+    from google.genai import errors as genai_errors
 except ImportError:  # pragma: no cover - optional until deps installed
     genai = None
+    genai_errors = None
 
 
 logger = logging.getLogger("whos-clip-is-it")
+MAX_GEMINI_OVERLOAD_RETRIES = 10
+RETRYABLE_OVERLOAD_STATUS = 503
 
 CLIP_JSON_SCHEMA: Dict[str, Any] = {
     "type": "array",
@@ -109,6 +113,35 @@ def _parse_response(raw_text: str) -> List[Dict[str, Any]]:
     raise ValueError("Gemini response did not contain a clip array")
 
 
+def _is_overloaded_error(exc: Exception) -> bool:
+    if genai_errors and isinstance(exc, genai_errors.ServerError):
+        status_code = getattr(exc, "status_code", None)
+        if status_code == RETRYABLE_OVERLOAD_STATUS:
+            return True
+    message = str(exc).lower()
+    return "503" in message and "overloaded" in message
+
+
+def _generate_with_retry(client: Any, *, contents: List[Any], config_data: Dict[str, Any]) -> Any:
+    for attempt in range(1, MAX_GEMINI_OVERLOAD_RETRIES + 1):
+        try:
+            return client.models.generate_content(
+                model=config.GEMINI_MODEL,
+                contents=contents,
+                config=config_data,
+            )
+        except Exception as exc:
+            if not _is_overloaded_error(exc) or attempt == MAX_GEMINI_OVERLOAD_RETRIES:
+                raise
+            backoff_s = min(2 ** (attempt - 1), 10)
+            logger.warning(
+                "gemini_overloaded retrying attempt=%s backoff_s=%s",
+                attempt,
+                backoff_s,
+            )
+            time.sleep(backoff_s)
+
+
 def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
     if genai is None:
         raise RuntimeError("google-genai is not installed")
@@ -145,10 +178,10 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
             "thinking_config": {"thinking_level": _thinking_level()},
             "temperature": 0.2,
         }
-        response = client.models.generate_content(
-            model=config.GEMINI_MODEL,
+        response = _generate_with_retry(
+            client,
             contents=[uploaded, prompt],
-            config=base_config,
+            config_data=base_config,
         )
         try:
             clips = _parse_response(response.text or "")
@@ -159,10 +192,10 @@ def _call_gemini_sync(input_path: Path, prompt: str) -> Dict[str, Any]:
                 "Return ONLY a valid JSON array matching the schema. "
                 "No markdown, no extra keys."
             )
-            retry = client.models.generate_content(
-                model=config.GEMINI_MODEL,
+            retry = _generate_with_retry(
+                client,
                 contents=[uploaded, repair_prompt],
-                config=base_config,
+                config_data=base_config,
             )
             clips = _parse_response(retry.text or "")
     finally:
