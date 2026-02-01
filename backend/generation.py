@@ -172,9 +172,9 @@ def _build_grok_prompt(clip: Dict[str, Any], format_data: Dict[str, Any]) -> str
 
 
 def _map_duration_seconds(length_s: Optional[float]) -> int:
-    allowed = [4, 6, 8]
+    allowed = [4, 6, 8, 10]
     if not length_s:
-        return 6
+        return 10
     return sorted(allowed, key=lambda value: (abs(length_s - value), -value))[0]
 
 

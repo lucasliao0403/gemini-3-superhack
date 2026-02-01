@@ -4,30 +4,29 @@
     "name": "Anime highlight from a different angle",
     "input_mode": "video_plus_prompt",
     "model": "xai/grok-imagine-video/image-to-video",
-    "length_s": 6,
+    "length_s": 10,
     "prompt_reference": "Generate a highly accurate anime rendition of this scene from an angle where the face of the star player can be seen. Turn this into a dramatic anime scene where {description} is happening, highly stylized and pay attention to details.",
     "prompt_template": "Anime highlight edit of this moment: {{description}}. Emphasize drama and intensity.",
     "ref_frame_prompt": "Anime-style football highlight still frame. Show the action clearly: {description}. Vertical 9:16."
   },
   {
     "id": 2,
-    "name": "Freeform parody reel (no source realism)",
-    "input_mode": "video_plus_prompt",
-    "model": "xai/grok-imagine-video/image-to-video",
-    "length_s": 6,
-    "skip_asset_extraction": true,
-    "prompt_reference": "Create a fully invented, stylized parody reel inspired by the moment, not a faithful recreation.\n\nTone: absurd, over-the-top sports commentary energy; playful ridicule of the original play or the TV coverage style.\n\nFreedom: you can exaggerate motion, scale, physics, and stakes. Keep the scene coherent and cinematic but do NOT try to match the real broadcast camera or real-world accuracy.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the parody vibe through lighting, camera movement, and staging only.\n\nMaintain a consistent cast and uniforms across the six beats, but feel free to invent the setting details.",
-    "prompt_template": "Freeform parody reel inspired by: {{description}}. Do not try to match the real broadcast. No on-screen text.",
-    "ref_frame_prompt": "Stylized parody sports highlight still frame. Invented setting, cinematic lighting, exaggerated motion. Show the action clearly: {description}. Vertical 9:16. No text."
-  },
-  {
-    "id": 3,
     "name": "ESPN-style studio segment parody (ridicule/hot-take)",
     "input_mode": "video_plus_prompt",
     "model": "xai/grok-imagine-video/image-to-video",
-    "length_s": 6,
+    "length_s": 10,
     "prompt_reference": "Create a short-form sports studio segment that FEELS like an ESPN/SportsCenter-style highlight breakdown, but as a parody.\n\nTone: smug, overproduced, overly-serious analysis of something obvious; lightly ridicules the network-style hot-take theatrics OR lightly ridicules the original play (but keep it playful, not hateful).\n\nVisual language: polished studio lighting, dramatic camera moves, quick cutaways, replay-style angles, slow-motion emphasis, tasteful lens flares.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the \"ESPN segment\" vibe through set design, lighting, and camera direction only.\n\nMaintain player identity and uniforms, keep the action readable, and keep the scene coherent from beat 1 to beat 6.",
     "prompt_template": "ESPN-style studio breakdown parody of: {{description}}. Overproduced analysis vibe. No on-screen text.",
     "ref_frame_prompt": "Polished sports studio segment parody frame. Cinematic studio lighting. Show the key moment clearly: {description}. Optional analyst silhouette/desk in foreground. Vertical 9:16. No text."
+  },
+  {
+    "id": 3,
+    "name": "Medieval reenactment highlight (period clothing + medieval English accents)",
+    "input_mode": "video_plus_prompt",
+    "model": "xai/grok-imagine-video/image-to-video",
+    "length_s": 10,
+    "prompt_reference": "Transform this sports moment into a medieval reenactment of the same action.\n\nVisual world: late medieval England vibe. Replace all modern elements (stadium, uniforms, pads, helmets, signage, modern lighting) with medieval equivalents: stone walls, wooden stands, banners without text, torchlight, muddy ground, cobblestones, countryside.\n\nCharacters: everyone is in period-accurate medieval clothing/armor (tunics, cloaks, leather jerkins, gambesons, simple mail). Keep the \"star player\" identifiable by consistent facial features and body language, but not by modern uniforms.\n\nAction: preserve the core choreography so it is clearly the same play described by {description}. Make it readable and coherent. Use dramatic medieval cinematography: handheld grit, slow-motion impacts, dust/mud particles, cinematic torchlit highlights.\n\nAudio: include spoken commentary as if from medieval English announcers with medieval English accents and archaic phrasing (e.g., \"By my troth!\", \"Hark!\", \"Verily!\"). Keep it energetic and humorous, but not hateful.\n\nImportant: Do NOT include any on-screen text, captions, watermarks, logos, modern UI, or modern broadcast graphics. No guns, no cars, no electricity, no neon, no smartphones.",
+    "prompt_template": "Medieval reenactment highlight of this moment: {{description}}. Everyone in medieval clothing/armor. Torchlit, gritty, cinematic. Commentary in medieval English accents with archaic phrasing. No on-screen text.",
+    "ref_frame_prompt": "Medieval reenactment highlight still frame. Period-accurate clothing/armor, torchlit scene, stone/wooden stands. Show the key action clearly: {description}. Vertical 9:16. No text."
   }
 ]

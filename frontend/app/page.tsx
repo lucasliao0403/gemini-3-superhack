@@ -7,11 +7,27 @@ import { createJob, isDemoMode, formatBytes, getDemoJobId } from "@/lib/api";
 
 const MAX_MB = 100;
 
+type PromptFormat = {
+  id: number;
+  name: string;
+  input_mode?: string;
+  model?: string;
+  length_s?: number;
+  prompt_reference?: string;
+  prompt_template?: string;
+  ref_frame_prompt?: string;
+};
+
 export default function Home() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isFormatsOpen, setIsFormatsOpen] = useState(false);
+  const [isFormatsLoading, setIsFormatsLoading] = useState(false);
+  const [formatsError, setFormatsError] = useState<string | null>(null);
+  const [formats, setFormats] = useState<PromptFormat[] | null>(null);
 
   const demoMode = useMemo(() => isDemoMode(), []);
 
@@ -38,6 +54,36 @@ export default function Home() {
 
     setError(null);
     setFile(nextFile);
+  };
+
+  const loadFormats = async () => {
+    setFormatsError(null);
+    setIsFormatsLoading(true);
+    try {
+      const res = await fetch("/api/formats", { cache: "no-store" });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(body?.error || `Failed to load formats (${res.status})`);
+      }
+
+      const data = (await res.json()) as PromptFormat[];
+      setFormats(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFormatsError(
+        err instanceof Error ? err.message : "Failed to load formats."
+      );
+    } finally {
+      setIsFormatsLoading(false);
+    }
+  };
+
+  const onToggleFormats = async () => {
+    setIsFormatsOpen((prev) => !prev);
+    if (!formats && !isFormatsLoading) {
+      await loadFormats();
+    }
   };
 
   const onSubmit = async (event: FormEvent) => {
@@ -105,8 +151,46 @@ export default function Home() {
             <a className="button secondary" href={`/jobs/${getDemoJobId()}`}>
               View demo results
             </a>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={onToggleFormats}
+            >
+              see prompts
+            </button>
           </div>
         </form>
+
+        {isFormatsOpen && (
+          <section className="card stack">
+            <div className="row">
+              <h2>Prompt formats</h2>
+              {formats && <span className="badge">{formats.length} total</span>}
+            </div>
+
+            {isFormatsLoading && <p className="subtitle">loading prompts…</p>}
+            {formatsError && <p className="status error">{formatsError}</p>}
+
+            {formats && !isFormatsLoading && !formatsError && (
+              <div className="stack">
+                {formats.map((f) => (
+                  <div key={f.id} className="stack">
+                    <div className="row">
+                      <span className="badge">#{f.id}</span>
+                      <strong>{f.name}</strong>
+                      {typeof f.length_s === "number" && (
+                        <span className="subtitle">{f.length_s}s</span>
+                      )}
+                      {f.model && <span className="subtitle">{f.model}</span>}
+                    </div>
+
+                    <pre className="code">{JSON.stringify(f, null, 2)}</pre>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );

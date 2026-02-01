@@ -20,6 +20,10 @@ def select_format_id(formats_by_id: Dict[int, Dict[str, Any]]) -> int:
     Note: The pipeline is intentionally "one reel" (Gemini clip schema currently
     returns 1 clip), but we still randomize the style/format of that reel.
     """
+    # TEMPORARY: hard-code format 2 while freeform mode is being tested.
+    # Remove once randomized format selection is re-enabled.
+    if 2 in formats_by_id:
+        return 2
     if not formats_by_id:
         return 1
     return random.choice(list(formats_by_id.keys()))
