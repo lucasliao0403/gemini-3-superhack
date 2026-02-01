@@ -3,8 +3,11 @@ import type { JobStatus } from "@/lib/types";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "1";
+const DEMO_JOB_ID =
+  process.env.NEXT_PUBLIC_DEMO_JOB_ID || "ed9ed4aa83dd4e599ee9922f349f1fe6";
 
 export const isDemoMode = () => DEMO_MODE;
+export const getDemoJobId = () => DEMO_JOB_ID;
 
 export const formatBytes = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -59,7 +62,7 @@ export const withResolvedUrls = (job: JobStatus): JobStatus => {
 
 export async function createJob(file: File): Promise<{ job_id: string }> {
   if (DEMO_MODE) {
-    return { job_id: "demo" };
+    return { job_id: DEMO_JOB_ID };
   }
 
   const formData = new FormData();

@@ -198,32 +198,11 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             clip["clip_id"] = f"clip_{idx}"
 
         _write_json(job_dir / "clips.json", clips)
-        job_store.update_job(
-            job_id,
-            stage="extracting",
-            progress=25,
-            message="Extracting clip assets...",
-            clips=_sanitize_clips(job_id, clips),
-        )
-        print(f"stage_start job_id={job_id} stage=extracting")
-
-        for clip in clips:
-            assets_dir = job_dir / "assets" / clip["clip_id"]
-            if config.DEMO_MODE:
-                assets = _demo_assets(input_path, assets_dir)
-            else:
-                assets = asset_extraction.extract_assets(input_path, clip, assets_dir)
-            clip["assets"] = assets
-            job_store.update_job(
-                job_id,
-                message=f"Extracting {clip['clip_id']} assets...",
-                progress=min(55, 25 + int(30 * (int(clip['clip_id'].split('_')[-1]) / len(clips)))),
-            )
 
         job_store.update_job(
             job_id,
             stage="selecting_formats",
-            progress=60,
+            progress=22,
             message="Selecting reel formats...",
         )
         print(f"stage_start job_id={job_id} stage=selecting_formats")
@@ -236,6 +215,32 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             "formats_selected "
             f"job_id={job_id} format_ids={[clip.get('format_id') for clip in clips]}"
         )
+
+        job_store.update_job(
+            job_id,
+            stage="extracting",
+            progress=25,
+            message="Extracting clip assets...",
+            clips=_sanitize_clips(job_id, clips),
+        )
+        print(f"stage_start job_id={job_id} stage=extracting")
+
+        for clip in clips:
+            assets_dir = job_dir / "assets" / clip["clip_id"]
+            format_id = int(clip.get("format_id", 0) or 0)
+            format_data = formats_by_id.get(format_id, {})
+            if format_data.get("skip_asset_extraction"):
+                assets = {}
+            elif config.DEMO_MODE:
+                assets = _demo_assets(input_path, assets_dir)
+            else:
+                assets = asset_extraction.extract_assets(input_path, clip, assets_dir)
+            clip["assets"] = assets
+            job_store.update_job(
+                job_id,
+                message=f"Extracting {clip['clip_id']} assets...",
+                progress=min(55, 25 + int(30 * (int(clip['clip_id'].split('_')[-1]) / len(clips)))),
+            )
 
         job_store.update_job(
             job_id,

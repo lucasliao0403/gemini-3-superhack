@@ -17,10 +17,7 @@ export default function JobPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoggedFal, setHasLoggedFal] = useState(false);
 
-  const demoMode = useMemo(
-    () => isDemoMode() || jobId === "demo",
-    [jobId]
-  );
+  const demoMode = useMemo(() => isDemoMode(), []);
 
   useEffect(() => {
     if (!jobId) {

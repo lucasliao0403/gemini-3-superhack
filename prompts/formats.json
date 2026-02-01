@@ -10,6 +10,17 @@
     "ref_frame_prompt": "Anime-style football highlight still frame. Show the action clearly: {description}. Vertical 9:16."
   },
   {
+    "id": 2,
+    "name": "Freeform parody reel (no source realism)",
+    "input_mode": "video_plus_prompt",
+    "model": "xai/grok-imagine-video/image-to-video",
+    "length_s": 6,
+    "skip_asset_extraction": true,
+    "prompt_reference": "Create a fully invented, stylized parody reel inspired by the moment, not a faithful recreation.\n\nTone: absurd, over-the-top sports commentary energy; playful ridicule of the original play or the TV coverage style.\n\nFreedom: you can exaggerate motion, scale, physics, and stakes. Keep the scene coherent and cinematic but do NOT try to match the real broadcast camera or real-world accuracy.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the parody vibe through lighting, camera movement, and staging only.\n\nMaintain a consistent cast and uniforms across the six beats, but feel free to invent the setting details.",
+    "prompt_template": "Freeform parody reel inspired by: {{description}}. Do not try to match the real broadcast. No on-screen text.",
+    "ref_frame_prompt": "Stylized parody sports highlight still frame. Invented setting, cinematic lighting, exaggerated motion. Show the action clearly: {description}. Vertical 9:16. No text."
+  },
+  {
     "id": 3,
     "name": "ESPN-style studio segment parody (ridicule/hot-take)",
     "input_mode": "video_plus_prompt",

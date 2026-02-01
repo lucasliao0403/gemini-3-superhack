@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import config
+import random
 
 
 def load_formats() -> List[Dict[str, Any]]:
@@ -12,19 +13,16 @@ def load_formats() -> List[Dict[str, Any]]:
     return json.loads(formats_path.read_text())
 
 
-def select_format_id(clip: Dict[str, Any]) -> int:
-    clip_type = clip.get("type", "big_play")
-    energy = int(clip.get("announcer_energy", 5))
+def select_format_id(formats_by_id: Dict[int, Dict[str, Any]]) -> int:
+    """
+    Pick a random format from those available in prompts/formats.json.
 
-    mapping = {
-        "big_play": 10 if energy >= 8 else 3,
-        "fail": 8,
-        "reaction": 5,
-        "controversial": 6,
-        "clutch": 13,
-        "funny": 7,
-    }
-    return mapping.get(clip_type, 1)
+    Note: The pipeline is intentionally "one reel" (Gemini clip schema currently
+    returns 1 clip), but we still randomize the style/format of that reel.
+    """
+    if not formats_by_id:
+        return 1
+    return random.choice(list(formats_by_id.keys()))
 
 
 def assign_format_ids(
@@ -32,9 +30,7 @@ def assign_format_ids(
 ) -> List[Dict[str, Any]]:
     updated = []
     for clip in clips:
-        format_id = select_format_id(clip)
-        if format_id not in formats_by_id and formats_by_id:
-            format_id = next(iter(formats_by_id.keys()))
+        format_id = select_format_id(formats_by_id)
         clip = dict(clip)
         clip["format_id"] = format_id
         updated.append(clip)

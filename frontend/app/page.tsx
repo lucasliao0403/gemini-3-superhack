@@ -3,7 +3,7 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { createJob, isDemoMode, formatBytes } from "@/lib/api";
+import { createJob, isDemoMode, formatBytes, getDemoJobId } from "@/lib/api";
 
 const MAX_MB = 100;
 
@@ -79,9 +79,7 @@ export default function Home() {
 
         <form className="card stack" onSubmit={onSubmit}>
           <div>
-            <label className="label" htmlFor="video">
-              Upload MP4
-            </label>
+           
             <input
               id="video"
               className="file"
@@ -104,7 +102,7 @@ export default function Home() {
             <button className="button" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "uploading..." : "generate reel"}
             </button>
-            <a className="button secondary" href="/jobs/demo">
+            <a className="button secondary" href={`/jobs/${getDemoJobId()}`}>
               View demo results
             </a>
           </div>

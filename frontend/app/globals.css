@@ -112,11 +112,60 @@ h2 {
 .input,
 .file {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #fff;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
+}
+
+.file {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.file::file-selector-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-right: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.file::-webkit-file-upload-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-right: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.file::file-selector-button:hover,
+.file::-webkit-file-upload-button:hover {
+  border-color: var(--accent);
+}
+
+.file::file-selector-button:active,
+.file::-webkit-file-upload-button:active {
+  transform: translateY(1px);
+}
+
+.file:focus-visible {
+  outline: 2px solid rgba(17, 24, 39, 0.25);
+  outline-offset: 4px;
+  border-radius: 12px;
 }
 
 .button {
