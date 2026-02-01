@@ -13,7 +13,7 @@ import storyboard
 logger = logging.getLogger("whos-clip-is-it")
 DEBUG_LOG_PATH = "/Users/lucasliao/Documents/GitHub/gemini-3-superhack/.cursor/debug.log"
 MAX_FAL_RETRIES = 5
-MAX_FAL_PROMPT_CHARS = 4096
+MAX_FAL_PROMPT_CHARS = 2000
 
 
 def _debug_log(
@@ -354,7 +354,8 @@ async def generate_reels(
                 )
                 storyboard.build_vertical_storyboard(reference_paths, storyboard_path)
                 model = str(
-                    format_data.get("model") or "xai/grok-imagine-video/image-to-video"
+                    format_data.get("model")
+                    or "fal-ai/minimax/video-01/image-to-video"
                 ).strip()
                 debug_prompts = clip.get("debug_prompts") or {}
                 debug_prompts["storyboard"] = {"path": str(storyboard_path)}

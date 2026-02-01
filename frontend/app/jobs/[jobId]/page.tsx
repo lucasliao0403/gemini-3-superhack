@@ -85,7 +85,6 @@ export default function JobPage() {
         <Link className="button secondary" href="/">
           Back to upload
         </Link>
-        <span className="badge">Job {jobId || "..."}</span>
       </div>
 
       <div className="card stack">

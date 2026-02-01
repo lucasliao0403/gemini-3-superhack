@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+DEMO_JOB_ID = os.getenv("DEMO_JOB_ID", "ed9ed4aa83dd4e599ee9922f349f1fe6")
+DEMO_JOB_FALLBACK = os.getenv("DEMO_JOB_FALLBACK", "demo_this")
+
+
+def _resolve_job_id(job_id: str) -> str:
+    if job_id == DEMO_JOB_ID and not job_store.job_file(job_id).exists():
+        if job_store.job_file(DEMO_JOB_FALLBACK).exists():
+            return DEMO_JOB_FALLBACK
+    return job_id
 
 
 def _validate_upload(file: UploadFile) -> None:
@@ -87,6 +98,7 @@ async def create_job(file: UploadFile = File(...)) -> dict[str, Any]:
 
 @app.get("/api/jobs/{job_id}")
 def get_job(job_id: str) -> dict[str, Any]:
+    job_id = _resolve_job_id(job_id)
     try:
         return job_store.load_job(job_id)
     except FileNotFoundError:
@@ -95,6 +107,7 @@ def get_job(job_id: str) -> dict[str, Any]:
 
 @app.get("/api/jobs/{job_id}/outputs/{path:path}")
 def get_output(job_id: str, path: str) -> FileResponse:
+    job_id = _resolve_job_id(job_id)
     try:
         output_path = job_store.safe_job_path(job_id, path)
     except ValueError:

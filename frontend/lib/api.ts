@@ -6,8 +6,14 @@ const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "1";
 const DEMO_JOB_ID =
   process.env.NEXT_PUBLIC_DEMO_JOB_ID || "ed9ed4aa83dd4e599ee9922f349f1fe6";
 
+const normalizeJobId = (value: string) => {
+  const trimmed = value.trim();
+  const parts = trimmed.split("/").filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1] : trimmed;
+};
+
 export const isDemoMode = () => DEMO_MODE;
-export const getDemoJobId = () => DEMO_JOB_ID;
+export const getDemoJobId = () => normalizeJobId(DEMO_JOB_ID);
 
 export const formatBytes = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;

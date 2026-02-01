@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createJob, isDemoMode, formatBytes, getDemoJobId } from "../lib/api";
@@ -30,6 +30,18 @@ export default function Home() {
   const [formats, setFormats] = useState<PromptFormat[] | null>(null);
 
   const demoMode = useMemo(() => isDemoMode(), []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== "q") return;
+      if (event.repeat) return;
+      router.push("/jobs/demo_this");
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [router]);
 
   const handleFile = (nextFile: File | null) => {
     if (!nextFile) {
@@ -148,7 +160,7 @@ export default function Home() {
             <button className="button" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "uploading..." : "generate reel"}
             </button>
-            <a className="button secondary" href={`/jobs/${getDemoJobId()}`}>
+            <a className="button secondary" href="/past-reels">
               View past reels
             </a>
             <button
