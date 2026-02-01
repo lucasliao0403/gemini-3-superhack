@@ -28,6 +28,30 @@ export type ClipMoment = {
     i2i_prompt_prefix?: string;
     segment_script?: string;
   };
+  debug_prompts?: {
+    prompt_writer?: {
+      input?: string | null;
+      output?: {
+        frame_prompts?: string[];
+        video_prompt?: string;
+        i2i_prompt_prefix?: string;
+        segment_script?: string;
+      };
+    };
+    keyframes?: {
+      frame_prompts?: string[];
+      i2i_prompt_prefix?: string;
+      generated_frame_urls?: string[];
+    };
+    storyboard?: {
+      url?: string;
+    };
+    video?: {
+      grok_prompt?: string;
+      fal_payload?: unknown;
+      model?: string;
+    };
+  };
 };
 
 export type ReelResult = {
@@ -46,6 +70,9 @@ export type JobStatus = {
   progress?: number;
   message?: string;
   error?: { message: string };
+  created_at?: number;
+  updated_at?: number;
+  original_filename?: string;
   clips?: ClipMoment[];
   outputs?: ReelResult[];
   fal_debug?: unknown;

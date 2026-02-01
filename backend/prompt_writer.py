@@ -78,6 +78,7 @@ def write_prompts(
         raise RuntimeError("google-genai is not installed")
 
     reference = str(format_data.get("prompt_reference", "")).strip()
+    ignore_real_beats = bool(format_data.get("ignore_real_beats"))
     description = str(clip.get("description", "")).strip()
     context = str(clip.get("context", "")).strip()
     players = ", ".join(clip.get("players", []) or [])
@@ -91,10 +92,31 @@ def write_prompts(
 
     storyboard_frames = clip.get("generated_storyboard_frames") or []
     storyboard_block = ""
-    if isinstance(storyboard_frames, list) and storyboard_frames:
+    if not ignore_real_beats and isinstance(storyboard_frames, list) and storyboard_frames:
         storyboard_block = "Generated storyboard beats (from the generated/stylized perspective):\n"
         for idx, frame in enumerate(storyboard_frames, start=1):
             storyboard_block += f"{idx}. {frame}\n"
+
+    extra_rules = ""
+    if ignore_real_beats:
+        extra_rules = (
+            "- Do NOT reconstruct real clip beats or camera angles.\n"
+            "- Generate reactionary studio/cutaway beats loosely inspired by the clip.\n"
+            "- Every frame must be inside a studio set (desk, analysts, studio lighting).\n"
+            "- The play is discussed, not depicted; no on-court action framing.\n"
+        )
+
+    if ignore_real_beats:
+        base_rules = (
+            "- Keep it studio-focused and analyst-driven.\n"
+            "- Use the description as the topic being analyzed, not an action to depict.\n"
+            "- Include studio set elements (desk, analysts, studio lighting, monitors without text) in most frames.\n"
+        )
+    else:
+        base_rules = (
+            "- Keep it football-focused and coherent.\n"
+            "- Use the description as the [X action] to depict.\n"
+        )
 
     instruction = (
         "You are a prompt-writer for a sequential image generation pipeline.\n"
@@ -112,11 +134,11 @@ def write_prompts(
         f"{physical_block}\n"
         f"{storyboard_block}\n"
         "Rules:\n"
-        "- Keep it football-focused and coherent.\n"
-        "- Use the description as the [X action] to depict.\n"
+        f"{base_rules}"
         "- Keyframe prompts should be sequential and cinematic (frame 1 → frame 6).\n"
         "- Frame 1 should emphasize a clear angle where the star player's face is visible.\n"
         "- Include distinct physical attributes (body build, muscularity, skin tone, hair).\n"
+        f"{extra_rules}"
         "- The video prompt should describe the full dramatic stylized scene.\n"
         "- The segment_script should be a punchy 1-3 sentence voiceover script (20-50 words) that matches the chosen style.\n"
         "- The segment_script must NOT request any on-screen text, logos, watermarks, or split panels.\n"
@@ -158,6 +180,7 @@ def write_prompts(
                 f"Context: {context}."
             ).strip()
         return {
+            "_prompt_writer_input": instruction,
             "frame_prompts": frame_prompts,
             "video_prompt": video_prompt,
             "i2i_prompt_prefix": i2i_prompt_prefix,

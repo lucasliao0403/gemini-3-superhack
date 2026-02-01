@@ -149,8 +149,20 @@ def generate_keyframes(
     frame_prompts = [str(item).strip() for item in frame_prompts]
 
     i2i_prefix = str(clip_prompts.get("i2i_prompt_prefix") or DEFAULT_I2I_PREFIX).strip()
+    if format_data.get("ignore_real_beats"):
+        studio_prefix = (
+            "Studio-only segment. Keep every frame inside a studio set with analysts, desk, "
+            "and studio lighting. No on-court action framing; the play is discussed, not shown."
+        )
+        i2i_prefix = f"{studio_prefix}\n{i2i_prefix}"
 
     assets = clip.get("assets") or {}
+    debug_prompts = clip.get("debug_prompts") or {}
+    keyframes_debug = debug_prompts.get("keyframes") or {}
+    keyframes_debug["frame_prompts"] = frame_prompts
+    keyframes_debug["i2i_prompt_prefix"] = i2i_prefix
+    debug_prompts["keyframes"] = keyframes_debug
+    clip["debug_prompts"] = debug_prompts
 
     output_dir = job_store.job_dir(job_id) / "assets" / clip_id
     output_dir.mkdir(parents=True, exist_ok=True)

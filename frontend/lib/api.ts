@@ -38,19 +38,42 @@ export const withResolvedUrls = (job: JobStatus): JobStatus => {
     poster_url: resolveUrl(output.poster_url) || output.poster_url,
   }));
   const clips = job.clips?.map((clip) => {
-    if (!clip.assets) return clip;
+    const debugPrompts = clip.debug_prompts;
+    const assets = clip.assets;
     return {
       ...clip,
-      assets: {
-        ...clip.assets,
-        frame_url: resolveUrl(clip.assets.frame_url) || clip.assets.frame_url,
-        frame_urls: resolveUrlList(clip.assets.frame_urls),
-        ref_frame_url:
-          resolveUrl(clip.assets.ref_frame_url) || clip.assets.ref_frame_url,
-        generated_frame_urls: resolveUrlList(clip.assets.generated_frame_urls),
-        clip_url: resolveUrl(clip.assets.clip_url) || clip.assets.clip_url,
-        audio_url: resolveUrl(clip.assets.audio_url) || clip.assets.audio_url,
-      },
+      assets: assets
+        ? {
+            ...assets,
+            frame_url: resolveUrl(assets.frame_url) || assets.frame_url,
+            frame_urls: resolveUrlList(assets.frame_urls),
+            ref_frame_url: resolveUrl(assets.ref_frame_url) || assets.ref_frame_url,
+            generated_frame_urls: resolveUrlList(assets.generated_frame_urls),
+            clip_url: resolveUrl(assets.clip_url) || assets.clip_url,
+            audio_url: resolveUrl(assets.audio_url) || assets.audio_url,
+          }
+        : undefined,
+      debug_prompts: debugPrompts
+        ? {
+            ...debugPrompts,
+            keyframes: debugPrompts.keyframes
+              ? {
+                  ...debugPrompts.keyframes,
+                  generated_frame_urls: resolveUrlList(
+                    debugPrompts.keyframes.generated_frame_urls
+                  ),
+                }
+              : undefined,
+            storyboard: debugPrompts.storyboard
+              ? {
+                  ...debugPrompts.storyboard,
+                  url:
+                    resolveUrl(debugPrompts.storyboard.url) ||
+                    debugPrompts.storyboard.url,
+                }
+              : undefined,
+          }
+        : undefined,
     };
   });
   // #region agent log
@@ -100,4 +123,14 @@ export async function fetchJob(
     throw new Error(errorText || "Failed to load job.");
   }
   return response.json();
+}
+
+export async function listJobs(): Promise<JobStatus[]> {
+  const response = await fetch(`${API_BASE_URL}/api/jobs`, { cache: "no-store" });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to load jobs.");
+  }
+  const data = (await response.json()) as unknown;
+  return Array.isArray(data) ? (data as JobStatus[]) : [];
 }

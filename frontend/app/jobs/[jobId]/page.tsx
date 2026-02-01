@@ -228,6 +228,124 @@ export default function JobPage() {
                     )}
                   </div>
                 )}
+                {clip.debug_prompts && (
+                  <details className="stack">
+                    <summary className="subtitle">Prompt steps</summary>
+                    <div className="stack">
+                      {clip.debug_prompts.prompt_writer && (
+                        <details className="stack">
+                          <summary className="subtitle">Prompt writer</summary>
+                          {clip.debug_prompts.prompt_writer.input && (
+                            <div className="stack">
+                              <span className="subtitle">Input</span>
+                              <pre className="code">
+                                {clip.debug_prompts.prompt_writer.input}
+                              </pre>
+                            </div>
+                          )}
+                          {clip.debug_prompts.prompt_writer.output && (
+                            <div className="stack">
+                              <span className="subtitle">Output (JSON)</span>
+                              <pre className="code">
+                                {JSON.stringify(
+                                  clip.debug_prompts.prompt_writer.output,
+                                  null,
+                                  2
+                                )}
+                              </pre>
+                            </div>
+                          )}
+                        </details>
+                      )}
+
+                      {clip.debug_prompts.keyframes && (
+                        <details className="stack">
+                          <summary className="subtitle">Keyframe generation</summary>
+                          {clip.debug_prompts.keyframes.frame_prompts?.length ? (
+                            <div className="stack">
+                              <span className="subtitle">Prompts</span>
+                              <pre className="code">
+                                {clip.debug_prompts.keyframes.frame_prompts
+                                  .map((prompt, idx) => `#${idx + 1} ${prompt}`)
+                                  .join("\n")}
+                              </pre>
+                            </div>
+                          ) : null}
+                          {clip.debug_prompts.keyframes.i2i_prompt_prefix && (
+                            <div className="stack">
+                              <span className="subtitle">i2i prefix</span>
+                              <pre className="code">
+                                {clip.debug_prompts.keyframes.i2i_prompt_prefix}
+                              </pre>
+                            </div>
+                          )}
+                          {clip.debug_prompts.keyframes.generated_frame_urls?.length ? (
+                            <div className="stack">
+                              <span className="subtitle">Generated keyframes</span>
+                              <div className="scroll-row">
+                                {clip.debug_prompts.keyframes.generated_frame_urls.map(
+                                  (url, idx) => (
+                                    <img
+                                      key={`${url}-${idx}`}
+                                      className="video"
+                                      src={url}
+                                      alt={`Generated keyframe ${idx + 1} for ${clip.clip_id || "clip"}`}
+                                    />
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </details>
+                      )}
+
+                      {clip.debug_prompts.storyboard?.url && (
+                        <details className="stack">
+                          <summary className="subtitle">Storyboard</summary>
+                          <div className="scroll-row">
+                            <img
+                              className="video"
+                              src={clip.debug_prompts.storyboard.url}
+                              alt={`Storyboard for ${clip.clip_id || "clip"}`}
+                            />
+                          </div>
+                        </details>
+                      )}
+
+                      {clip.debug_prompts.video && (
+                        <details className="stack">
+                          <summary className="subtitle">Video generation</summary>
+                          {clip.debug_prompts.video.model && (
+                            <div className="stack">
+                              <span className="subtitle">Model</span>
+                              <pre className="code">{clip.debug_prompts.video.model}</pre>
+                            </div>
+                          )}
+                          {clip.debug_prompts.video.grok_prompt && (
+                            <div className="stack">
+                              <span className="subtitle">Grok prompt</span>
+                              <pre className="code">
+                                {clip.debug_prompts.video.grok_prompt}
+                              </pre>
+                            </div>
+                          )}
+                          {clip.debug_prompts.video.fal_payload && (
+                            <div className="stack">
+                              <span className="subtitle">FAL payload</span>
+                              <pre className="code">
+                                {JSON.stringify(
+                                  clip.debug_prompts.video.fal_payload,
+                                  null,
+                                  2
+                                )}
+                              </pre>
+                            </div>
+                          )}
+                        </details>
+                      )}
+                    </div>
+                  </details>
+                )}
               </div>
             ))}
           </div>

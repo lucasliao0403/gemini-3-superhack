@@ -103,3 +103,34 @@ def get_output(job_id: str, path: str) -> FileResponse:
     if not output_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(output_path)
+
+
+@app.get("/api/jobs")
+def list_jobs(limit: int = 50) -> list[dict[str, Any]]:
+    """
+    List stored jobs on disk.
+
+    Jobs are stored under config.JOBS_DIR/<job_id>/job.json.
+    """
+    try:
+        config.ensure_base_dirs()
+        job_ids = [
+            p.name
+            for p in config.JOBS_DIR.iterdir()
+            if p.is_dir() and (p / job_store.JOB_FILENAME).exists()
+        ]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    jobs: list[dict[str, Any]] = []
+    for job_id in job_ids:
+        try:
+            jobs.append(job_store.load_job(job_id))
+        except Exception:
+            # Skip malformed/unreadable jobs rather than failing the whole list.
+            continue
+
+    jobs.sort(key=lambda j: int(j.get("created_at") or 0), reverse=True)
+    if limit > 0:
+        jobs = jobs[:limit]
+    return jobs

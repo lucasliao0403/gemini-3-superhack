@@ -96,6 +96,8 @@ def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, 
         clip_copy = dict(clip)
         assets = clip_copy.get("assets") or {}
         safe_assets: Dict[str, str] = {}
+        debug_prompts = clip_copy.get("debug_prompts") or {}
+        safe_debug: Dict[str, Any] = {}
         clip_id = clip_copy.get("clip_id")
         if clip_id:
             frame_path = assets.get("frame_path")
@@ -134,6 +136,48 @@ def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, 
             audio_path = assets.get("audio_path")
             if audio_path and Path(audio_path).exists():
                 safe_assets["audio_url"] = f"/api/jobs/{job_id}/outputs/assets/{clip_id}/audio.wav"
+
+            if isinstance(debug_prompts, dict):
+                prompt_writer = debug_prompts.get("prompt_writer")
+                if isinstance(prompt_writer, dict):
+                    safe_debug["prompt_writer"] = {
+                        "input": prompt_writer.get("input"),
+                        "output": prompt_writer.get("output"),
+                    }
+
+                keyframes = debug_prompts.get("keyframes")
+                if isinstance(keyframes, dict):
+                    safe_keyframes = {
+                        "frame_prompts": keyframes.get("frame_prompts"),
+                        "i2i_prompt_prefix": keyframes.get("i2i_prompt_prefix"),
+                    }
+                    generated_frame_paths = assets.get("generated_frame_paths")
+                    if isinstance(generated_frame_paths, list):
+                        generated_urls = []
+                        for path in generated_frame_paths:
+                            if path and Path(path).exists():
+                                generated_urls.append(
+                                    f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(path).name}"
+                                )
+                        if generated_urls:
+                            safe_keyframes["generated_frame_urls"] = generated_urls
+                    safe_debug["keyframes"] = safe_keyframes
+
+                storyboard = debug_prompts.get("storyboard")
+                if isinstance(storyboard, dict):
+                    storyboard_path = storyboard.get("path")
+                    if storyboard_path and Path(storyboard_path).exists():
+                        safe_debug["storyboard"] = {
+                            "url": f"/api/jobs/{job_id}/outputs/assets/{clip_id}/{Path(storyboard_path).name}"
+                        }
+
+                video = debug_prompts.get("video")
+                if isinstance(video, dict):
+                    safe_debug["video"] = {
+                        "grok_prompt": video.get("grok_prompt"),
+                        "fal_payload": video.get("fal_payload"),
+                        "model": video.get("model"),
+                    }
         # region agent log
         _debug_log(
             hypothesis_id="H5",
@@ -150,6 +194,8 @@ def _sanitize_clips(job_id: str, clips: List[Dict[str, Any]]) -> List[Dict[str, 
         # endregion agent log
         if safe_assets:
             clip_copy["assets"] = safe_assets
+        if safe_debug:
+            clip_copy["debug_prompts"] = safe_debug
         sanitized.append(clip_copy)
     # region agent log
     _debug_log(
@@ -258,7 +304,14 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
                 format_data=format_data,
             )
             if prompts:
+                prompt_writer_input = prompts.pop("_prompt_writer_input", None)
                 clip["prompts"] = prompts
+                debug_prompts = clip.get("debug_prompts") or {}
+                debug_prompts["prompt_writer"] = {
+                    "input": prompt_writer_input,
+                    "output": dict(prompts),
+                }
+                clip["debug_prompts"] = debug_prompts
             job_store.update_job(
                 job_id,
                 message=f"Writing {clip['clip_id']} prompts...",
@@ -330,6 +383,7 @@ async def run_pipeline(job_id: str, input_path: Path) -> None:
             for item in generated
         ]
         job_store.update_job(job_id, fal_debug=fal_debug)
+        job_store.update_job(job_id, clips=_sanitize_clips(job_id, clips))
 
         job_store.update_job(
             job_id,

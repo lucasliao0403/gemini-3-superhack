@@ -5,6 +5,8 @@
     "input_mode": "video_plus_prompt",
     "model": "xai/grok-imagine-video/image-to-video",
     "length_s": 10,
+    "skip_asset_extraction": false,
+    "ignore_real_beats": false,
     "prompt_reference": "Generate a highly accurate anime rendition of this scene from an angle where the face of the star player can be seen. Turn this into a dramatic anime scene where {description} is happening, highly stylized and pay attention to details.",
     "prompt_template": "Anime highlight edit of this moment: {{description}}. Emphasize drama and intensity.",
     "ref_frame_prompt": "Anime-style football highlight still frame. Show the action clearly: {description}. Vertical 9:16."
@@ -15,9 +17,11 @@
     "input_mode": "video_plus_prompt",
     "model": "xai/grok-imagine-video/image-to-video",
     "length_s": 10,
-    "prompt_reference": "Create a short-form sports studio segment that FEELS like an ESPN/SportsCenter-style highlight breakdown, but as a parody.\n\nTone: smug, overproduced, overly-serious analysis of something obvious; lightly ridicules the network-style hot-take theatrics OR lightly ridicules the original play (but keep it playful, not hateful).\n\nVisual language: polished studio lighting, dramatic camera moves, quick cutaways, replay-style angles, slow-motion emphasis, tasteful lens flares.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the \"ESPN segment\" vibe through set design, lighting, and camera direction only.\n\nMaintain player identity and uniforms, keep the action readable, and keep the scene coherent from beat 1 to beat 6.",
+    "skip_asset_extraction": true,
+    "ignore_real_beats": true,
+    "prompt_reference": "Create a short-form sports studio segment that FEELS like an ESPN/SportsCenter-style highlight breakdown, but as a parody.\n\nTone: smug, overproduced, overly-serious analysis of something obvious; lightly ridicules the network-style hot-take theatrics OR lightly ridicules the original play (but keep it playful, not hateful).\n\nVisual language: polished studio lighting, dramatic camera moves, quick cutaways, replay-style angles, slow-motion emphasis, tasteful lens flares.\n\nStudio-only framing: EVERY frame is inside a studio set with analysts, desk, studio lighting rigs, and monitors/graphics surfaces WITHOUT text. No on-court action shots, no arena framing, no in-game camera angles. The play is only discussed/referenced, not depicted.\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, or split-screen panels. Convey the \"ESPN segment\" vibe through set design, lighting, and camera direction only.\n\nMaintain player identity and uniforms where shown (e.g., photo board or replay screen without text), keep the scene coherent from beat 1 to beat 6.",
     "prompt_template": "ESPN-style studio breakdown parody of: {{description}}. Overproduced analysis vibe. No on-screen text.",
-    "ref_frame_prompt": "Polished sports studio segment parody frame. Cinematic studio lighting. Show the key moment clearly: {description}. Optional analyst silhouette/desk in foreground. Vertical 9:16. No text."
+    "ref_frame_prompt": "Polished sports studio segment parody frame. Cinematic studio lighting. Studio-only set with analysts and desk; no on-court action. The play is referenced by discussion only: {description}. Optional analyst silhouette/desk in foreground. Vertical 9:16. No text."
   },
   {
     "id": 3,
@@ -25,8 +29,34 @@
     "input_mode": "video_plus_prompt",
     "model": "xai/grok-imagine-video/image-to-video",
     "length_s": 10,
-    "prompt_reference": "Transform this sports moment into a medieval reenactment of the same action.\n\nVisual world: late medieval England vibe. Replace all modern elements (stadium, uniforms, pads, helmets, signage, modern lighting) with medieval equivalents: stone walls, wooden stands, banners without text, torchlight, muddy ground, cobblestones, countryside.\n\nCharacters: everyone is in period-accurate medieval clothing/armor (tunics, cloaks, leather jerkins, gambesons, simple mail). Keep the \"star player\" identifiable by consistent facial features and body language, but not by modern uniforms.\n\nAction: preserve the core choreography so it is clearly the same play described by {description}. Make it readable and coherent. Use dramatic medieval cinematography: handheld grit, slow-motion impacts, dust/mud particles, cinematic torchlit highlights.\n\nAudio: include spoken commentary as if from medieval English announcers with medieval English accents and archaic phrasing (e.g., \"By my troth!\", \"Hark!\", \"Verily!\"). Keep it energetic and humorous, but not hateful.\n\nImportant: Do NOT include any on-screen text, captions, watermarks, logos, modern UI, or modern broadcast graphics. No guns, no cars, no electricity, no neon, no smartphones.",
+    "skip_asset_extraction": false,
+    "ignore_real_beats": false,
+    "prompt_reference": "Create a short-form medieval reenactment highlight of the described play.\n\nTone: epic, gritty, and energetic; playful medieval hype, not hateful.\n\nVisual language: late medieval England vibe; torchlight, drifting smoke, mud and dust particles, dramatic handheld camera moves, cinematic slow-motion impacts, quick cutaways, replay-like angles.\n\nWorldbuilding: replace all modern elements (stadium seating, uniforms, pads, helmets, signage, modern lighting) with medieval equivalents: stone walls, wooden stands, banners WITHOUT text, torches, cobblestones/muddy ground, countryside.\n\nCharacters: everyone wears period-accurate medieval clothing/armor (tunics, cloaks, leather jerkins, gambesons, simple mail). Keep the star player identifiable via consistent facial features and body language, but do NOT use modern uniforms.\n\nAudio: include spoken commentary delivered with medieval English accents and archaic phrasing (e.g., \"By my troth!\", \"Hark!\", \"Verily!\").\n\nImportant: Do NOT include any on-screen text, lower-thirds, scorebugs, captions, watermarks, logos, modern UI, or modern broadcast graphics. Keep the action readable and coherent, and keep the scene coherent from beat 1 to beat 6. No guns, no cars, no electricity, no neon, no smartphones.\n\nBase the choreography on: {description}.",
     "prompt_template": "Medieval reenactment highlight of this moment: {{description}}. Everyone in medieval clothing/armor. Torchlit, gritty, cinematic. Commentary in medieval English accents with archaic phrasing. No on-screen text.",
     "ref_frame_prompt": "Medieval reenactment highlight still frame. Period-accurate clothing/armor, torchlit scene, stone/wooden stands. Show the key action clearly: {description}. Vertical 9:16. No text."
+  },
+  {
+    "id": 4,
+    "name": "Bro Really Thought (ridicule edit + funny noises)",
+    "input_mode": "video_plus_prompt",
+    "model": "xai/grok-imagine-video/image-to-video",
+    "length_s": 10,
+    "skip_asset_extraction": true,
+    "ignore_real_beats": true,
+    "prompt_reference": "Create a short-form meme-style sports highlight edit that ridicules the player for a bad decision/failed attempt described by {description}.\n\nTone: playful roast / \"bro really thought\" energy; punchy, funny, not hateful.\n\nVisual language: quick comedic timing, exaggerated reaction shots, sudden zooms, whip-pans, snap zooms, comedic slow-motion on the mistake, and a clean freeze-frame moment (WITHOUT any on-screen text).\n\nAudio: add funny noises and meme-y sound effects timed to the key beats (e.g., record scratch, slide whistle, boing, cartoon bonk, sad trombone, exaggerated crowd \"oooh\").\n\nImportant: Do NOT include any on-screen text, captions, subtitles, lower-thirds, scorebugs, watermarks, logos, or UI overlays. Keep the action readable and coherent from beat 1 to beat 6 and preserve the core choreography of: {description}.",
+    "prompt_template": "\"Bro really thought\" ridicule edit of: {{description}}. Funny noises/SFX timed to the fail. No on-screen text.",
+    "ref_frame_prompt": "Meme-style ridicule highlight still frame. Comedic reaction angle, dramatic close-up on the mistake moment: {description}. Vertical 9:16. No text."
+  },
+  {
+    "id": 5,
+    "name": "Nature documentary (Attenborough parody)",
+    "input_mode": "video_plus_prompt",
+    "model": "xai/grok-imagine-video/image-to-video",
+    "length_s": 10,
+    "skip_asset_extraction": false,
+    "ignore_real_beats": false,
+    "prompt_reference": "Create a short-form nature documentary segment that treats this sports moment like wildlife footage.\n\nTone: calm, observational, lightly humorous; respectful, not hateful.\n\nVisual language: naturalistic cinematography, gentle push-ins, occasional slow motion for key beats, shallow depth of field, documentary-style cutaways to reactions.\n\nAudio: include a British nature-narrator voice (Attenborough-inspired but not an impersonation) describing the players as \"specimens\" and the play as a mating ritual/territory contest metaphor. Add subtle ambient crowd as if it's \"habitat\" ambience.\n\nImportant: Do NOT include any on-screen text, captions, lower-thirds, scorebugs, watermarks, logos, or UI overlays.\n\nMaintain player identity and uniforms, keep the action readable, and keep the scene coherent from beat 1 to beat 6.\n\nBase the narration and staging on: {description}.",
+    "prompt_template": "Nature documentary parody of: {{description}}. Calm British narrator voice (inspired, not impersonation). Ambient 'habitat' audio. No on-screen text.",
+    "ref_frame_prompt": "Nature documentary-style sports still frame. Cinematic naturalistic lighting, close-up focus on key action: {description}. Vertical 9:16. No text."
   }
 ]

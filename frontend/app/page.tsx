@@ -3,7 +3,7 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { createJob, isDemoMode, formatBytes, getDemoJobId } from "@/lib/api";
+import { createJob, isDemoMode, formatBytes, getDemoJobId } from "../lib/api";
 
 const MAX_MB = 100;
 
@@ -149,7 +149,7 @@ export default function Home() {
               {isSubmitting ? "uploading..." : "generate reel"}
             </button>
             <a className="button secondary" href={`/jobs/${getDemoJobId()}`}>
-              View demo results
+              View past reels
             </a>
             <button
               className="button secondary"
