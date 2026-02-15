@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import threading
 import uuid
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,29 @@ app.add_middleware(
 
 DEMO_JOB_ID = os.getenv("DEMO_JOB_ID", "ed9ed4aa83dd4e599ee9922f349f1fe6")
 DEMO_JOB_FALLBACK = os.getenv("DEMO_JOB_FALLBACK", "demo_this")
+
+
+def _start_pipeline_background(job_id: str, input_path: Path) -> None:
+    """
+    Run the pipeline off the main server event loop.
+
+    The pipeline currently performs substantial synchronous work (ffmpeg/subprocess,
+    file IO, sync SDK calls). Running it as an asyncio task on the main event loop
+    can prevent the API from serving requests while a job is generating.
+    """
+
+    def _runner() -> None:
+        try:
+            asyncio.run(pipeline.run_pipeline(job_id, input_path))
+        except Exception:
+            # `run_pipeline` already catches and records failures, but keep a log
+            # in case we fail before its internal try/except executes.
+            logger.exception("pipeline_thread_failed job_id=%s", job_id)
+
+    thread = threading.Thread(
+        target=_runner, name=f"pipeline-{job_id[:8]}", daemon=True
+    )
+    thread.start()
 
 
 def _resolve_job_id(job_id: str) -> str:
@@ -92,7 +116,7 @@ async def create_job(file: UploadFile = File(...)) -> dict[str, Any]:
     )
 
     print(f"pipeline_start job_id={job_id}")
-    asyncio.create_task(pipeline.run_pipeline(job_id, input_path))
+    _start_pipeline_background(job_id, input_path)
     return {"job_id": job_id}
 
 

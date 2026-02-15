@@ -1,6 +1,7 @@
 import json
 import time
 from pathlib import Path
+import tempfile
 from typing import Any, Dict
 
 import config
@@ -59,7 +60,21 @@ def load_job(job_id: str) -> Dict[str, Any]:
 
 def write_job(job_id: str, job: Dict[str, Any]) -> None:
     job["updated_at"] = int(time.time())
-    job_file(job_id).write_text(json.dumps(job, indent=2))
+    # Atomic write to avoid partially-written JSON being read by `/api/jobs/{job_id}`.
+    path = job_file(job_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(job, indent=2)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=str(path.parent),
+        delete=False,
+        prefix=path.name + ".",
+        suffix=".tmp",
+    ) as handle:
+        handle.write(payload)
+        tmp_path = Path(handle.name)
+    tmp_path.replace(path)
 
 
 def update_job(job_id: str, **fields: Any) -> Dict[str, Any]:
